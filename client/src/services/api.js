@@ -31,6 +31,12 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
+    // Don't intercept the refresh request itself — let AuthContext handle it
+    const isRefreshRequest = original.url?.includes('/api/auth/refresh');
+    if (isRefreshRequest) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !original._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -58,7 +64,11 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         window.__accessToken = null;
-        window.location.href = '/login';
+        // Only redirect if not already on a public auth page
+        const path = window.location.pathname;
+        if (path !== '/login' && path !== '/register' && path !== '/') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const errorHandler = require('./middleware/errorHandler');
 require('./config/db'); // Triggers DB connection test on startup
 
@@ -25,6 +26,7 @@ app.use(cors({
 // ─── Body Parser ──────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -34,8 +36,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ─── API Routes (mounted in later phases) ─────────────────────────────────────
-// app.use('/api/auth', require('./routes/auth'));
+// ─── API Routes ───────────────────────────────────────────────────────────────
+app.use('/api/auth', require('./routes/auth'));
 // app.use('/api/movies', require('./routes/movies'));
 // app.use('/api/series', require('./routes/series'));
 // app.use('/api/games', require('./routes/games'));
