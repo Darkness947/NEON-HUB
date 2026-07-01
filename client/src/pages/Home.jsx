@@ -1,99 +1,127 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import mediaService from '../services/mediaService';
+import MediaCard from '../components/media/MediaCard';
+import SkeletonCard from '../components/media/SkeletonCard';
+import { truncateText } from '../utils/truncateText';
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [popularSeries, setPopularSeries] = useState([]);
+  const [featuredMovie, setFeaturedMovie] = useState(null);
+  const [isLoadingMovies, setIsLoadingMovies] = useState(true);
+  const [isLoadingSeries, setIsLoadingSeries] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadData = async () => {
+      try {
+        const movies = await mediaService.fetchTrendingMovies();
+        if (!cancelled) {
+          setTrendingMovies(movies);
+          if (movies.length > 0) {
+            // Pick a random movie from top 5 for hero
+            const top5 = movies.slice(0, 5);
+            setFeaturedMovie(top5[Math.floor(Math.random() * top5.length)]);
+          }
+          setIsLoadingMovies(false);
+        }
+      } catch (err) {
+        if (!cancelled) setIsLoadingMovies(false);
+      }
+
+      try {
+        const series = await mediaService.fetchTrendingSeries();
+        if (!cancelled) {
+          setPopularSeries(series);
+          setIsLoadingSeries(false);
+        }
+      } catch (err) {
+        if (!cancelled) setIsLoadingSeries(false);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="page-container fade-in">
       {/* Hero Section */}
-      <div className="text-center" style={{ padding: '8vh 0 6vh' }}>
-        <h1
+      {featuredMovie && (
+        <div 
+          className="hero-section"
           style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 700,
-            marginBottom: 'var(--spacing-md)',
+            backgroundImage: `linear-gradient(to right, rgba(13, 13, 26, 0.9) 0%, rgba(13, 13, 26, 0.4) 100%), url(${featuredMovie.backdrop_url})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            padding: '8vh 2rem',
+            borderRadius: 'var(--radius-lg)',
+            marginBottom: 'var(--spacing-xl)',
+            minHeight: '400px',
+            display: 'flex',
+            alignItems: 'center',
           }}
         >
-          <span style={{ color: 'var(--color-accent-purple)' }}>NEON</span>{' '}
-          <span style={{ color: 'var(--color-accent-blue)' }}>HUB</span>
-        </h1>
-        <p
-          className="text-muted mx-auto"
-          style={{
-            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-            maxWidth: '600px',
-            lineHeight: 1.7,
-          }}
-        >
-          Track your movies, TV series, and video games in one beautiful dashboard.
-          Rate, review, and organize everything you watch and play.
-        </p>
+          <div style={{ maxWidth: '600px' }}>
+            <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: 'var(--spacing-md)' }}>
+              {featuredMovie.title}
+            </h1>
+            <p className="text-muted" style={{ fontSize: '1.1rem', marginBottom: 'var(--spacing-lg)' }}>
+              {truncateText(featuredMovie.overview, 150)}
+            </p>
+            <div className="d-flex gap-3">
+              <Link to={`/movies/${featuredMovie.tmdb_id}`} className="btn btn-primary px-4 py-2">
+                View Details
+              </Link>
+              <button className="btn btn-outline-primary px-4 py-2" onClick={() => console.log('Add to library')}>
+                + Add to Library
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-        <div className="d-flex justify-content-center gap-3 mt-4">
-          {isAuthenticated ? (
-            <Link className="btn btn-primary px-4 py-2" to="/dashboard">
-              Go to Dashboard
-            </Link>
-          ) : (
-            <>
-              <Link className="btn btn-primary px-4 py-2" to="/register">
-                Get Started
-              </Link>
-              <Link className="btn btn-outline-primary px-4 py-2" to="/login">
-                Sign In
-              </Link>
-            </>
-          )}
+      {/* Trending Movies Row */}
+      <div className="mb-5">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h3 className="mb-0">Trending Movies</h3>
+          <Link to="/discover?tab=movies" className="text-accent-blue">See All →</Link>
+        </div>
+        <div 
+          className="d-flex gap-3"
+          style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}
+        >
+          {isLoadingMovies 
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            : trendingMovies.map(movie => (
+                <MediaCard key={movie.tmdb_id} {...movie} />
+              ))
+          }
         </div>
       </div>
 
-      {/* Feature Cards */}
-      <div className="row g-4 mt-4" style={{ maxWidth: '900px', margin: '0 auto' }}>
-        {[
-          {
-            icon: '🎬',
-            title: 'Movies',
-            desc: 'Track films from TMDB — mark as watched, rate, and review.',
-          },
-          {
-            icon: '📺',
-            title: 'TV Series',
-            desc: 'Follow shows episode by episode with progress tracking.',
-          },
-          {
-            icon: '🎮',
-            title: 'Games',
-            desc: 'Log your gaming library powered by RAWG — hours played, status, reviews.',
-          },
-        ].map((feature) => (
-          <div className="col-md-4" key={feature.title}>
-            <div
-              className="card h-100 p-4 text-center"
-              style={{
-                transition: 'transform var(--transition-base), box-shadow var(--transition-base)',
-                cursor: 'default',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-glow-purple)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{ fontSize: '2.5rem', marginBottom: 'var(--spacing-sm)' }}>
-                {feature.icon}
-              </div>
-              <h4 style={{ fontFamily: 'var(--font-display)' }}>{feature.title}</h4>
-              <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>
-                {feature.desc}
-              </p>
-            </div>
-          </div>
-        ))}
+      {/* Popular TV Series Row */}
+      <div className="mb-5">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h3 className="mb-0">Trending TV Series</h3>
+          <Link to="/discover?tab=series" className="text-accent-blue">See All →</Link>
+        </div>
+        <div 
+          className="d-flex gap-3"
+          style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}
+        >
+          {isLoadingSeries
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            : popularSeries.map(series => (
+                <MediaCard key={series.tmdb_id} {...series} />
+              ))
+          }
+        </div>
       </div>
     </div>
   );

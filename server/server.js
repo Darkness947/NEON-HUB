@@ -38,8 +38,8 @@ app.get('/health', (req, res) => {
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/movies', require('./routes/movies'));
-// app.use('/api/series', require('./routes/series'));
+app.use('/api/movies', require('./routes/movies'));
+app.use('/api/series', require('./routes/series'));
 // app.use('/api/games', require('./routes/games'));
 // app.use('/api/library', require('./routes/library'));
 // app.use('/api/reviews', require('./routes/reviews'));
