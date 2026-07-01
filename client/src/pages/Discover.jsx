@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import mediaService from '../services/mediaService';
 import MediaCard from '../components/media/MediaCard';
+import GameCard from '../components/media/GameCard';
 import SkeletonCard from '../components/media/SkeletonCard';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 
@@ -49,7 +50,13 @@ const Discover = () => {
           // For now, let's just do fetchTrendingSeries and not paginate it.
           response = { results: await mediaService.fetchTrendingSeries(), page: 1, total_pages: 1 };
         } else if (activeTab === 'games') {
-          response = { results: [], page: 1, total_pages: 1 };
+          // fetchTrendingGames supports pagination now
+          const gamesData = await mediaService.fetchTrendingGames(page);
+          // Assuming rawgService returns just an array, but wait...
+          // If mediaService.fetchTrendingGames(page) just returns the array, we need to mock total_pages.
+          // Or let's assume if gamesData is length > 0, page is valid.
+          // Our backend currently returns the array directly.
+          response = { results: gamesData, page, total_pages: gamesData.length > 0 ? page + 1 : page };
         }
 
         if (!cancelled) {
@@ -127,25 +134,18 @@ const Discover = () => {
         </li>
       </ul>
 
-      {activeTab === 'games' && (
-        <div className="text-center text-muted my-5">
-          <h3>Coming in Phase 4</h3>
-          <p>Game discovery is coming soon.</p>
-        </div>
-      )}
-
       {/* Grid */}
-      {activeTab !== 'games' && (
-        <div 
-          className="d-grid gap-4" 
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}
-        >
-          {items.map((item, i) => (
-            <MediaCard key={`${item.tmdb_id}-${i}`} {...item} />
-          ))}
-          {isLoading && Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={`sk-${i}`} />)}
-        </div>
-      )}
+      <div 
+        className="d-grid gap-4" 
+        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}
+      >
+        {items.map((item, i) => (
+          activeTab === 'games' 
+            ? <GameCard key={`${item.rawg_id}-${i}`} {...item} />
+            : <MediaCard key={`${item.tmdb_id}-${i}`} {...item} />
+        ))}
+        {isLoading && Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={`sk-${i}`} />)}
+      </div>
 
       {/* Intersection Observer Target */}
       <div ref={loaderRef} style={{ height: '20px', margin: '20px 0' }}></div>

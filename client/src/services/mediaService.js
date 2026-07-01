@@ -47,6 +47,22 @@ const mediaService = {
     const { data } = await api.get(`/api/series/${id}/season/${seasonNumber}`);
     return data.data;
   },
+
+  // ─── Games ────────────────────────────────────────────────────────────────
+  fetchTrendingGames: async (page = 1) => {
+    const { data } = await api.get('/api/games/trending', { params: { page } });
+    return data.data;
+  },
+
+  searchGames: async (query, page = 1) => {
+    const { data } = await api.get('/api/games/search', { params: { q: query, page } });
+    return data.data;
+  },
+
+  getGameById: async (id) => {
+    const { data } = await api.get(`/api/games/${id}`);
+    return data.data;
+  },
 };
 
 export default mediaService;

@@ -37,11 +37,16 @@ app.get('/health', (req, res) => {
 });
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/movies', require('./routes/movies'));
-app.use('/api/series', require('./routes/series'));
-// app.use('/api/games', require('./routes/games'));
-// app.use('/api/library', require('./routes/library'));
+const authRoutes = require('./routes/auth');
+const moviesRoutes = require('./routes/movies');
+const seriesRoutes = require('./routes/series');
+const gamesRoutes = require('./routes/games');
+
+// Mount routes
+app.use('/api/auth', authRoutes);
+app.use('/api/movies', moviesRoutes);
+app.use('/api/series', seriesRoutes);
+app.use('/api/games', gamesRoutes);
 // app.use('/api/reviews', require('./routes/reviews'));
 // app.use('/api/lists', require('./routes/lists'));
 // app.use('/api/dashboard', require('./routes/dashboard'));

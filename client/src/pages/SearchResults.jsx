@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import mediaService from '../services/mediaService';
 import MediaCard from '../components/media/MediaCard';
+import GameCard from '../components/media/GameCard';
 import SkeletonCard from '../components/media/SkeletonCard';
 
 const SearchResults = () => {
@@ -37,7 +38,8 @@ const SearchResults = () => {
         } else if (activeTab === 'series') {
           response = await mediaService.searchSeries(query);
         } else if (activeTab === 'games') {
-          response = { results: [] };
+          const gamesData = await mediaService.searchGames(query);
+          response = { results: gamesData };
         }
 
         if (!cancelled) {
@@ -105,27 +107,20 @@ const SearchResults = () => {
         </li>
       </ul>
 
-      {activeTab === 'games' && (
-        <div className="text-center text-muted my-5">
-          <h3>Coming in Phase 4</h3>
-          <p>Game search is coming soon.</p>
-        </div>
-      )}
-
       {/* Results Grid */}
-      {activeTab !== 'games' && (
-        <div className="d-grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
-          {isLoading ? (
-            Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
-          ) : items.length > 0 ? (
-            items.map(item => (
-              <MediaCard key={item.tmdb_id} {...item} />
-            ))
-          ) : (
-            <div className="text-muted" style={{ gridColumn: '1 / -1' }}>No results found.</div>
-          )}
-        </div>
-      )}
+      <div className="d-grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
+        ) : items.length > 0 ? (
+          items.map(item => (
+            activeTab === 'games'
+              ? <GameCard key={item.rawg_id} {...item} />
+              : <MediaCard key={item.tmdb_id} {...item} />
+          ))
+        ) : (
+          <div className="text-muted" style={{ gridColumn: '1 / -1' }}>No results found.</div>
+        )}
+      </div>
     </div>
   );
 };

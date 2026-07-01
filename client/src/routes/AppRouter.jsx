@@ -13,6 +13,7 @@ import NotFound from '../pages/NotFound';
 import Discover from '../pages/Discover';
 import MovieDetail from '../pages/movies/MovieDetail';
 import SeriesDetail from '../pages/series/SeriesDetail';
+import GameDetail from '../pages/games/GameDetail';
 import SearchResults from '../pages/SearchResults';
 
 // ─── Protected Route Wrapper ──────────────────────────────────────────────────
@@ -47,6 +48,7 @@ const AppRouter = () => {
           <Route path="/discover" element={<Discover />} />
           <Route path="/movies/:id" element={<MovieDetail />} />
           <Route path="/series/:id" element={<SeriesDetail />} />
+          <Route path="/games/:id" element={<GameDetail />} />
           <Route path="/search" element={<SearchResults />} />
 
           {/* Guest-only routes (redirect authenticated users) */}
