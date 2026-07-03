@@ -3,12 +3,19 @@ import { useParams } from 'react-router-dom';
 import mediaService from '../../services/mediaService';
 import GameCard from '../../components/media/GameCard';
 import { formatDate } from '../../utils/formatDate';
+import { useLibrary } from '../../hooks/useLibrary';
+import { getStatusColor } from '../../utils/getStatusColor';
+import FavoriteButton from '../../components/media/FavoriteButton';
 
 const GameDetail = () => {
   const { id } = useParams();
   const [game, setGame] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getStatus, isInLibrary, addToLibrary, removeFromLibrary } = useLibrary();
+  const currentStatus = getStatus('game', id);
+  const libraryItem = isInLibrary('game', id);
+  const isFavorite = libraryItem ? libraryItem.favorite : false;
 
   useEffect(() => {
     let cancelled = false;
@@ -110,12 +117,42 @@ const GameDetail = () => {
                 <strong>RAWG<br/>Rating</strong>
               </div>
               
-              <button className="btn btn-primary px-4 py-2" onClick={() => console.log('Add to library')}>
-                Add to Library
-              </button>
-              <button className="btn btn-outline-primary" style={{ borderRadius: '50%', width: '45px', height: '45px' }} onClick={() => console.log('Favorite')}>
-                ♥
-              </button>
+              <div className="d-flex align-items-center gap-3">
+                <button 
+                  className="btn px-4 py-2"
+                  style={{
+                    backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '20px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onClick={async () => {
+                    if (currentStatus) {
+                      await removeFromLibrary('game', id);
+                    } else {
+                      await addToLibrary('game', id, 'backlog');
+                    }
+                  }}
+                  onMouseOver={(e) => {
+                    if (currentStatus) {
+                      e.currentTarget.style.backgroundColor = 'var(--color-danger)';
+                      e.currentTarget.innerText = '✕ Remove from Library';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (currentStatus) {
+                      e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
+                      e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
+                    }
+                  }}
+                >
+                  {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
+                </button>
+                <FavoriteButton mediaType="game" mediaId={id} isFavorite={isFavorite} />
+              </div>
             </div>
 
             <div className="mb-4">

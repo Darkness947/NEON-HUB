@@ -39,16 +39,7 @@ const Discover = () => {
         if (activeTab === 'movies') {
           response = await mediaService.fetchPopularMovies(page);
         } else if (activeTab === 'series') {
-          // TMDB doesn't have a direct popular series with page via our proxy yet, 
-          // but we can use search with a generic query or just fetch trending.
-          // Wait, we didn't add getPopularSeries to our backend. 
-          // Let's just fetch trending series for now. The prompt said Discover page loads with infinite scroll. 
-          // Wait, let's use search with an empty query? No, search requires a query.
-          // I will use fetchTrendingSeries, which doesn't support pagination currently. 
-          // Actually, let me just fetch trending series.
-          // In the real app, we'd have getPopularSeries. 
-          // For now, let's just do fetchTrendingSeries and not paginate it.
-          response = { results: await mediaService.fetchTrendingSeries(), page: 1, total_pages: 1 };
+          response = await mediaService.fetchPopularSeries(page);
         } else if (activeTab === 'games') {
           // fetchTrendingGames supports pagination now
           const gamesData = await mediaService.fetchTrendingGames(page);

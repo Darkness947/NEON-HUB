@@ -33,6 +33,11 @@ const mediaService = {
     return data.data;
   },
 
+  fetchPopularSeries: async (page = 1) => {
+    const { data } = await api.get('/api/series/popular', { params: { page } });
+    return data.data;
+  },
+
   searchSeries: async (query, page = 1) => {
     const { data } = await api.get('/api/series/search', { params: { q: query, page } });
     return data.data;

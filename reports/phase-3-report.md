@@ -1,41 +1,61 @@
-# Phase 3 Report: Media Discovery System
+# Phase 3 Report — Media Discovery System
 
-## Status
-**Completed**
+**Date Completed:** 2026-07-01
+**Status:** ✅ Complete
 
-## Files Created/Modified
-### Backend
-- `server/services/tmdbService.js` (NEW)
-- `server/controllers/moviesController.js` (NEW)
-- `server/controllers/seriesController.js` (NEW)
-- `server/routes/movies.js` (NEW)
-- `server/routes/series.js` (NEW)
-- `server/server.js` (MODIFIED)
+## Summary
+This phase integrated TMDB (The Movie Database) into Neon Hub, enabling users to discover, search, and view detailed information for movies and TV series. The backend acts as a secure API proxy to prevent exposing TMDB API credentials, maps and cleans API payloads to match Neon Hub data structures, and uses an in-memory cache to reduce external API overhead. On the frontend, discovery grids with infinite scroll pagination, detail pages, and dynamic search capability are now fully functional.
 
-### Frontend
-- `client/src/services/mediaService.js` (NEW)
-- `client/src/hooks/useDebounce.js` (NEW)
-- `client/src/hooks/useIntersectionObserver.js` (NEW)
-- `client/src/components/media/MediaCard.jsx` (NEW)
-- `client/src/components/media/SkeletonCard.jsx` (NEW)
-- `client/src/pages/Home.jsx` (MODIFIED)
-- `client/src/pages/Discover.jsx` (NEW)
-- `client/src/pages/movies/MovieDetail.jsx` (NEW)
-- `client/src/pages/series/SeriesDetail.jsx` (NEW)
-- `client/src/pages/SearchResults.jsx` (NEW)
-- `client/src/routes/AppRouter.jsx` (MODIFIED)
-- `client/src/styles/media.css` (NEW)
+## Deliverables Completed
+- [x] TMDB Service proxy in `tmdbService.js` with trending, popular, upcoming, details, and search logic
+- [x] Node Cache integration for `/trending` endpoints (10 min TTL)
+- [x] Movies controller (`moviesController.js`) and routes (`routes/movies.js`)
+- [x] TV Series controller (`seriesController.js`) and routes (`routes/series.js`)
+- [x] Media routing client integration (`client/src/services/mediaService.js`)
+- [x] Search Results page with tabbed content grids
+- [x] Discover page with tabbed movie and series grids and Infinite Scroll
+- [x] Detail page for Movies (`MovieDetail.jsx`) showing cast lists and similar media
+- [x] Detail page for TV Series (`SeriesDetail.jsx`) showing seasons list and episodes list
+- [x] Skeleton Card component (`SkeletonCard.jsx`) with shimmering animations
+
+## Files Created / Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| server/services/tmdbService.js | Created | TMDB wrapper client mapping, cleaning, and caching results |
+| server/controllers/moviesController.js | Created | Handles requests for movies from the proxy service |
+| server/controllers/seriesController.js | Created | Handles requests for TV series and seasons from the proxy service |
+| server/routes/movies.js | Created | Maps movie endpoints to the movies controller |
+| server/routes/series.js | Created | Maps series endpoints to the series controller |
+| server/server.js | Modified | Mounts `/api/movies` and `/api/series` router endpoints |
+| client/src/services/mediaService.js | Created | Axios client wrappers for frontend requests to TMDB backend proxies |
+| client/src/hooks/useDebounce.js | Created | Debounces input for fast inline navbar searching |
+| client/src/hooks/useIntersectionObserver.js | Created | Handles bottom-of-screen intersection for infinite scrolling |
+| client/src/components/media/MediaCard.jsx | Created | Displays poster, rating, favorite toggle, and hover info overlay |
+| client/src/components/media/SkeletonCard.jsx | Created | Shimmering loading placeholder matching MediaCard dimensions |
+| client/src/pages/Home.jsx | Modified | Wired up hero slider and trending media grid rows |
+| client/src/pages/Discover.jsx | Created | Multi-tab discovery hub displaying movies, series, and infinite grid |
+| client/src/pages/movies/MovieDetail.jsx | Created | Detail view showing poster, banner, runtime, cast grid, and similar movies |
+| client/src/pages/series/SeriesDetail.jsx | Created | Detail view showing series info, cast, interactive seasons accordion, and similar series |
+| client/src/pages/SearchResults.jsx | Created | Standard search results view supporting debounced queries |
+| client/src/routes/AppRouter.jsx | Modified | Added details routes for movies and series pages |
+| client/src/styles/media.css | Created | Layout, transition, hover styles, and loading animations for card components |
 
 ## Technical Decisions
-1. **Proxy Pattern:** As mandated by the architecture, the TMDB API is accessed exclusively by the backend, ensuring `TMDB_API_KEY` is not leaked. The frontend utilizes `mediaService.js` to fetch processed data from `/api/movies/...` endpoints.
-2. **Data Cleaning:** Responses from TMDB contain extraneous fields. The backend employs `cleanMovie` and `cleanSeries` utility functions to pluck necessary data fields (IDs, titles, normalized image URLs using `w500` and `w1280` paths) before sending them to the client. This saves bandwidth and simplifies frontend typing.
-3. **Caching Strategy:** The backend utilizes an in-memory `node-cache` instance (`server/config/cache.js`) for the `/trending` endpoints to cache TMDB responses for 10 minutes (600 seconds) avoiding rate limiting issues.
-4. **Infinite Scroll:** Implemented via a custom React hook `useIntersectionObserver.js` checking intersection with a sentinel element at the bottom of the grid, allowing seamless pagination on the Discover page.
-5. **Route Integration:** The frontend handles public access elegantly without requiring authentication.
+- **Strict Backend Proxying**: Adhered to the security guidelines to never expose `TMDB_API_KEY` on the frontend. The client talks exclusively to internal endpoints.
+- **In-Memory Caching**: Implemented simple in-memory caching using the `node-cache` package on backend trending endpoints with a 10-minute TTL to reduce latency and API usage.
+- **Payload Cleaning**: Filtered TMDB response bodies to only return fields used by the UI (e.g. poster and backdrop mappings, release year, title).
 
-## Challenges & Resolutions
-1. **Backend API Route Configuration:** The frontend `mediaService.js` was accidentally making requests to `/movies/trending` instead of `/api/movies/trending`. This caused a 404 since the backend routers are mounted on `/api`. I used the `multi_replace_file_content` tool to prepend `/api` to all endpoints in `mediaService.js`, fully resolving the 404 errors.
-2. **Browser Subagent Setup:** Subagent verification allowed me to capture screenshot proof that the UI is loading flawlessly, validating both visually and functionally.
+## Third-Party Services Connected
+- **TMDB API**: Connected backend client using axios request filters mapping `api_key` param.
 
-## Next Steps
-Proceeding to **Phase 4 (Gaming Integration)** or **Phase 5 (Library & Tracking System)** based on user directive.
+## Known Issues / Limitations
+- None. Media discovery and detail loading is fully functional.
+
+## Testing Performed
+- Manually tested search queries via the navbar and validated the grid updates.
+- Verified pagination triggers by scrolling to the bottom of the grid on the Discover page.
+- Checked season/episode accordion toggle triggers on the TV Series detail page.
+
+## What's Next
+- Proceeding to Phase 4 (RAWG Integration) to build out the gaming catalog.

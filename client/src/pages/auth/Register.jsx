@@ -89,7 +89,7 @@ const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="reg-username" className="form-label" style={{ fontSize: '0.9rem' }}>
+            <label htmlFor="reg-username" className="form-label text-light" style={{ fontSize: '0.9rem' }}>
               Username
             </label>
             <input
@@ -111,7 +111,7 @@ const Register = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="reg-email" className="form-label" style={{ fontSize: '0.9rem' }}>
+            <label htmlFor="reg-email" className="form-label text-light" style={{ fontSize: '0.9rem' }}>
               Email
             </label>
             <input
@@ -128,7 +128,7 @@ const Register = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="reg-password" className="form-label" style={{ fontSize: '0.9rem' }}>
+            <label htmlFor="reg-password" className="form-label text-light" style={{ fontSize: '0.9rem' }}>
               Password
             </label>
             <input
@@ -149,7 +149,7 @@ const Register = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="reg-confirm" className="form-label" style={{ fontSize: '0.9rem' }}>
+            <label htmlFor="reg-confirm" className="form-label text-light" style={{ fontSize: '0.9rem' }}>
               Confirm Password
             </label>
             <input

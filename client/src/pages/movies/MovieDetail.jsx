@@ -3,12 +3,19 @@ import { useParams } from 'react-router-dom';
 import mediaService from '../../services/mediaService';
 import MediaCard from '../../components/media/MediaCard';
 import { formatDate } from '../../utils/formatDate';
+import { useLibrary } from '../../hooks/useLibrary';
+import { getStatusColor } from '../../utils/getStatusColor';
+import FavoriteButton from '../../components/media/FavoriteButton';
 
 const MovieDetail = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getStatus, isInLibrary, addToLibrary, removeFromLibrary } = useLibrary();
+  const currentStatus = getStatus('movie', id);
+  const libraryItem = isInLibrary('movie', id);
+  const isFavorite = libraryItem ? libraryItem.favorite : false;
 
   useEffect(() => {
     let cancelled = false;
@@ -101,12 +108,42 @@ const MovieDetail = () => {
                 <strong>User<br/>Score</strong>
               </div>
               
-              <button className="btn btn-primary px-4 py-2" onClick={() => console.log('Add to library')}>
-                Add to Library
-              </button>
-              <button className="btn btn-outline-primary" style={{ borderRadius: '50%', width: '45px', height: '45px' }} onClick={() => console.log('Favorite')}>
-                ♥
-              </button>
+              <div className="d-flex align-items-center gap-3">
+                <button 
+                  className="btn px-4 py-2"
+                  style={{
+                    backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '20px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onClick={async () => {
+                    if (currentStatus) {
+                      await removeFromLibrary('movie', id);
+                    } else {
+                      await addToLibrary('movie', id, 'planned');
+                    }
+                  }}
+                  onMouseOver={(e) => {
+                    if (currentStatus) {
+                      e.currentTarget.style.backgroundColor = 'var(--color-danger)';
+                      e.currentTarget.innerText = '✕ Remove from Library';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (currentStatus) {
+                      e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
+                      e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
+                    }
+                  }}
+                >
+                  {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
+                </button>
+                <FavoriteButton mediaType="movie" mediaId={id} isFavorite={isFavorite} />
+              </div>
             </div>
 
             <h5 className="text-muted" style={{ fontStyle: 'italic', marginBottom: 'var(--spacing-md)' }}>

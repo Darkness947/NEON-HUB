@@ -19,6 +19,7 @@ const buildImageUrl = (path, size = 'w500') => {
 
 // Cleaners
 const cleanMovie = (m) => ({
+  id: m.id,
   tmdb_id: m.id,
   title: m.title,
   poster_path: m.poster_path,
@@ -32,6 +33,7 @@ const cleanMovie = (m) => ({
 });
 
 const cleanSeries = (s) => ({
+  id: s.id,
   tmdb_id: s.id,
   title: s.name,
   poster_path: s.poster_path,
@@ -104,6 +106,11 @@ const getMovieById = async (id) => {
     })) || [],
     similar: data.similar?.results?.slice(0, 6).map(cleanMovie) || [],
   };
+};
+
+const getMovieBasic = async (id) => {
+  const { data } = await tmdbApi.get(`/movie/${id}`);
+  return cleanMovie(data);
 };
 
 // ─── Series ──────────────────────────────────────────────────────────────────
@@ -181,6 +188,21 @@ const getSeriesSeason = async (id, seasonNumber) => {
   };
 };
 
+const getSeriesBasic = async (id) => {
+  const { data } = await tmdbApi.get(`/tv/${id}`);
+  return cleanSeries(data);
+};
+
+const getPopularSeries = async (page = 1) => {
+  const { data } = await tmdbApi.get('/tv/popular', { params: { page } });
+  return {
+    results: data.results.map(cleanSeries),
+    page: data.page,
+    total_pages: data.total_pages,
+    total_results: data.total_results,
+  };
+};
+
 module.exports = {
   getTrendingMovies,
   getPopularMovies,
@@ -188,7 +210,10 @@ module.exports = {
   searchMovies,
   getMovieById,
   getTrendingSeries,
+  getPopularSeries,
   searchSeries,
   getSeriesById,
   getSeriesSeason,
+  getMovieBasic,
+  getSeriesBasic,
 };

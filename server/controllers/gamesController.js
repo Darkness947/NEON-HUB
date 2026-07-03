@@ -6,7 +6,7 @@ const getTrendingGames = asyncHandler(async (req, res) => {
   const games = await rawgService.getTrendingGames(page);
   
   res.status(200).json({
-    status: 'success',
+    success: true,
     data: games,
   });
 });
@@ -16,13 +16,13 @@ const searchGames = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   
   if (!q) {
-    return res.status(200).json({ status: 'success', data: [] });
+    return res.status(200).json({ success: true, data: [] });
   }
 
   const games = await rawgService.searchGames(q, page);
   
   res.status(200).json({
-    status: 'success',
+    success: true,
     data: games,
   });
 });
@@ -34,7 +34,7 @@ const getGameById = asyncHandler(async (req, res) => {
   const similar = await rawgService.getSimilarGames(id);
   
   res.status(200).json({
-    status: 'success',
+    success: true,
     data: {
       ...game,
       similar,

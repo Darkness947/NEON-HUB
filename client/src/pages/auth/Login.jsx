@@ -69,7 +69,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="login-email" className="form-label" style={{ fontSize: '0.9rem' }}>
+            <label htmlFor="login-email" className="form-label text-light" style={{ fontSize: '0.9rem' }}>
               Email
             </label>
             <input
@@ -86,7 +86,7 @@ const Login = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="login-password" className="form-label" style={{ fontSize: '0.9rem' }}>
+            <label htmlFor="login-password" className="form-label text-light" style={{ fontSize: '0.9rem' }}>
               Password
             </label>
             <input

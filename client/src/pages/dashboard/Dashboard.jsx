@@ -1,7 +1,9 @@
 import { useAuth } from '../../hooks/useAuth';
+import { useLibrary } from '../../hooks/useLibrary';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { movies, series, games } = useLibrary();
 
   return (
     <div className="page-container fade-in">
@@ -11,9 +13,9 @@ const Dashboard = () => {
 
       <div className="row g-4">
         {[
-          { label: 'Movies', count: 0, icon: '🎬', color: 'var(--color-accent-purple)' },
-          { label: 'Series', count: 0, icon: '📺', color: 'var(--color-accent-blue)' },
-          { label: 'Games', count: 0, icon: '🎮', color: 'var(--color-accent-amber)' },
+          { label: 'Movies', count: movies.length, icon: '🎬', color: 'var(--color-accent-purple)' },
+          { label: 'Series', count: series.length, icon: '📺', color: 'var(--color-accent-blue)' },
+          { label: 'Games', count: games.length, icon: '🎮', color: 'var(--color-accent-amber)' },
           { label: 'Reviews', count: 0, icon: '✍️', color: 'var(--color-success)' },
         ].map((stat) => (
           <div className="col-6 col-md-3" key={stat.label}>

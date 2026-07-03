@@ -14,6 +14,7 @@ const rawgApi = axios.create({
 
 // Cleaners
 const cleanGame = (g) => ({
+  id: g.id,
   rawg_id: g.id,
   title: g.name,
   poster_url: g.background_image,
@@ -84,6 +85,11 @@ const rawgService = {
       // If endpoint fails, return empty array
       return [];
     }
+  },
+  
+  getGameBasic: async (id) => {
+    const { data } = await rawgApi.get(`/games/${id}`);
+    return cleanGame(data);
   }
 };
 

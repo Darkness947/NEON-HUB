@@ -15,6 +15,12 @@ import MovieDetail from '../pages/movies/MovieDetail';
 import SeriesDetail from '../pages/series/SeriesDetail';
 import GameDetail from '../pages/games/GameDetail';
 import SearchResults from '../pages/SearchResults';
+import Library from '../pages/library/Library';
+import Favorites from '../pages/favorites/Favorites';
+import CustomLists from '../pages/lists/CustomLists';
+import MyReviews from '../pages/reviews/MyReviews';
+import Profile from '../pages/profile/Profile';
+import Settings from '../pages/profile/Settings';
 
 // ─── Protected Route Wrapper ──────────────────────────────────────────────────
 const ProtectedRoute = () => {
@@ -60,7 +66,12 @@ const AppRouter = () => {
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            {/* Phase 3+: more protected routes added here */}
+            <Route path="/library" element={<Library />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/lists" element={<CustomLists />} />
+            <Route path="/reviews" element={<MyReviews />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
 
           {/* 404 */}

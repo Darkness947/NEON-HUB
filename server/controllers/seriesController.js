@@ -6,6 +6,12 @@ const getTrending = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data });
 });
 
+const getPopular = asyncHandler(async (req, res) => {
+  const page = req.query.page || 1;
+  const data = await tmdbService.getPopularSeries(page);
+  res.status(200).json({ success: true, data });
+});
+
 const search = asyncHandler(async (req, res) => {
   const query = req.query.q;
   const page = req.query.page || 1;
@@ -29,6 +35,7 @@ const getSeason = asyncHandler(async (req, res) => {
 
 module.exports = {
   getTrending,
+  getPopular,
   search,
   getById,
   getSeason,

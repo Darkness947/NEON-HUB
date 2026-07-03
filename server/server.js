@@ -19,7 +19,18 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like curl requests)
+    if (!origin) return callback(null, true);
+    // Allow any localhost/127.0.0.1 origin in development
+    if (process.env.NODE_ENV !== 'production' && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'), false);
+  },
   credentials: true,
 }));
 
@@ -41,12 +52,14 @@ const authRoutes = require('./routes/auth');
 const moviesRoutes = require('./routes/movies');
 const seriesRoutes = require('./routes/series');
 const gamesRoutes = require('./routes/games');
+const libraryRoutes = require('./routes/library');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', moviesRoutes);
 app.use('/api/series', seriesRoutes);
 app.use('/api/games', gamesRoutes);
+app.use('/api/library', libraryRoutes);
 // app.use('/api/reviews', require('./routes/reviews'));
 // app.use('/api/lists', require('./routes/lists'));
 // app.use('/api/dashboard', require('./routes/dashboard'));
