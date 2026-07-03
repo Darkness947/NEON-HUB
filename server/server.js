@@ -62,7 +62,7 @@ app.use('/api/games', gamesRoutes);
 app.use('/api/library', libraryRoutes);
 // app.use('/api/reviews', require('./routes/reviews'));
 // app.use('/api/lists', require('./routes/lists'));
-// app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/dashboard', require('./routes/dashboard'));
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {
