@@ -8,7 +8,7 @@ const baseValidation = [
     .isInt({ min: 1 })
     .withMessage('Media ID must be a positive integer'),
   body('rating')
-    .optional()
+    .optional({ nullable: true })
     .isInt({ min: 1, max: 10 })
     .withMessage('Rating must be between 1 and 10'),
   body('hours_played')

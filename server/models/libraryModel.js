@@ -28,6 +28,8 @@ const updateMovie = async (userId, tmdbId, fields) => {
 
   if (updates.length === 0) return null;
 
+  updates.push('updated_at = NOW()');
+
   values.push(userId, tmdbId);
   const result = await pool.query(
     `UPDATE tracked_movies
@@ -122,6 +124,8 @@ const updateSeries = async (userId, tmdbId, fields) => {
 
   if (updates.length === 0) return null;
 
+  updates.push('updated_at = NOW()');
+
   values.push(userId, tmdbId);
   const result = await pool.query(
     `UPDATE tracked_series
@@ -215,6 +219,8 @@ const updateGame = async (userId, rawgId, fields) => {
   }
 
   if (updates.length === 0) return null;
+
+  updates.push('updated_at = NOW()');
 
   values.push(userId, rawgId);
   const result = await pool.query(

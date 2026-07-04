@@ -18,6 +18,7 @@ import SearchResults from '../pages/SearchResults';
 import Library from '../pages/library/Library';
 import Favorites from '../pages/favorites/Favorites';
 import CustomLists from '../pages/lists/CustomLists';
+import ListDetail from '../pages/lists/ListDetail';
 import MyReviews from '../pages/reviews/MyReviews';
 import Profile from '../pages/profile/Profile';
 import Settings from '../pages/profile/Settings';
@@ -69,6 +70,7 @@ const AppRouter = () => {
             <Route path="/library" element={<Library />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/lists" element={<CustomLists />} />
+            <Route path="/lists/:id" element={<ListDetail />} />
             <Route path="/reviews" element={<MyReviews />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />

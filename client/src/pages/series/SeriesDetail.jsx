@@ -1,21 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import mediaService from '../../services/mediaService';
+import reviewService from '../../services/reviewService';
 import MediaCard from '../../components/media/MediaCard';
 import { formatDate } from '../../utils/formatDate';
 import { useLibrary } from '../../hooks/useLibrary';
 import { getStatusColor } from '../../utils/getStatusColor';
 import FavoriteButton from '../../components/media/FavoriteButton';
+import ReviewModal from '../../components/media/ReviewModal';
+import AddToListModal from '../../components/media/AddToListModal';
+import toast from 'react-hot-toast';
 
 const SeriesDetail = () => {
   const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [series, setSeries] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviewsError, setReviewsError] = useState(null);
+  
   const { getStatus, isInLibrary, addToLibrary, removeFromLibrary } = useLibrary();
   const currentStatus = getStatus('series', id);
   const libraryItem = isInLibrary('series', id);
   const isFavorite = libraryItem ? libraryItem.favorite : false;
+
+  // Modals state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showListModal, setShowListModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -24,17 +37,18 @@ const SeriesDetail = () => {
       try {
         setIsLoading(true);
         const data = await mediaService.getSeriesById(id);
-        if (!cancelled) {
-          setSeries(data);
+        if (!cancelled) setSeries(data);
+        
+        try {
+          const revData = await reviewService.getMediaReviews('series', id);
+          if (!cancelled) setReviews(revData);
+        } catch (revErr) {
+          if (!cancelled) setReviewsError('Failed to load reviews');
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(err.message || 'Failed to load series details');
-        }
+        if (!cancelled) setError(err.message || 'Failed to load series details');
       } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        if (!cancelled) setIsLoading(false);
       }
     };
 
@@ -44,6 +58,30 @@ const SeriesDetail = () => {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (location.state?.openReviewModal && !isLoading && !showReviewModal) {
+      setShowReviewModal(true);
+      // Clear the state so it doesn't reopen on close
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, isLoading, showReviewModal, navigate]);
+
+  const handleSaveReview = async (rating, reviewText) => {
+    try {
+      if (!currentStatus) {
+        await addToLibrary('series', id, 'completed');
+      }
+      await reviewService.updateReview('series', id, rating ? parseInt(rating) : null, reviewText);
+      toast.success('Review saved!');
+      setShowReviewModal(false);
+      // Refresh reviews
+      const revData = await reviewService.getMediaReviews('series', id);
+      setReviews(revData);
+    } catch (err) {
+      toast.error(err.message || 'Failed to save review');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -143,6 +181,13 @@ const SeriesDetail = () => {
                   {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
                 </button>
                 <FavoriteButton mediaType="series" mediaId={id} isFavorite={isFavorite} />
+                <button 
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowListModal(true)}
+                  title="Add to Custom List"
+                >
+                  + List
+                </button>
               </div>
             </div>
 
@@ -203,6 +248,43 @@ const SeriesDetail = () => {
           </div>
         )}
 
+        {/* Reviews Section */}
+        <div className="mb-5">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h3 className="mb-0">Reviews</h3>
+            <button className="btn btn-primary" onClick={() => setShowReviewModal(true)}>
+              Write Review
+            </button>
+          </div>
+          {reviewsError ? (
+            <p className="text-danger">{reviewsError}</p>
+          ) : reviews.length > 0 ? (
+            <div className="d-flex flex-column gap-3">
+              {reviews.map((r, i) => (
+                <div key={i} className="card p-3 bg-surface border-0">
+                  <div className="d-flex align-items-center mb-2">
+                    <img src={r.avatar_url || '/images/default-avatar.png'} alt={r.username} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} className="me-2" />
+                    <div>
+                      <div className="fw-bold text-light">{r.username}</div>
+                      <div className="text-muted small">{formatDate(r.created_at)}</div>
+                    </div>
+                    {r.rating && (
+                      <div className="ms-auto d-flex align-items-center bg-dark px-2 py-1 rounded">
+                        <span className="text-accent-amber me-1">★</span>
+                        <span className="fw-bold text-light">{r.rating}</span>
+                        <span className="text-light small ms-1">/ 10</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="mb-0 text-light mt-2" style={{ whiteSpace: 'pre-line' }}>{r.review}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted">No reviews yet. Be the first to review this series!</p>
+          )}
+        </div>
+
         {/* Similar Series Section */}
         {series.similar && series.similar.length > 0 && (
           <div>
@@ -215,6 +297,23 @@ const SeriesDetail = () => {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <ReviewModal 
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onSave={handleSaveReview}
+        initialRating={libraryItem?.rating}
+        initialReview={libraryItem?.review}
+        mediaTitle={series.title}
+      />
+      <AddToListModal 
+        isOpen={showListModal}
+        onClose={() => setShowListModal(false)}
+        mediaType="series"
+        mediaId={id}
+        mediaTitle={series.title}
+      />
     </div>
   );
 };

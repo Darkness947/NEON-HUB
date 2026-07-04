@@ -60,8 +60,8 @@ app.use('/api/movies', moviesRoutes);
 app.use('/api/series', seriesRoutes);
 app.use('/api/games', gamesRoutes);
 app.use('/api/library', libraryRoutes);
-// app.use('/api/reviews', require('./routes/reviews'));
-// app.use('/api/lists', require('./routes/lists'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/lists', require('./routes/lists'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
