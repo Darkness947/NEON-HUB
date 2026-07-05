@@ -1,5 +1,5 @@
 /* ─── Google Fonts ─────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Rajdhani:wght@400;500;600;700&display=swap');
 @import url('./media.css');
 
 /* ─── CSS Custom Properties (Design System) ────────────────────────────────── */
@@ -13,6 +13,16 @@
   --color-accent-purple: #7B2FBE;
   --color-accent-blue: #00B4D8;
   --color-accent-amber: #F4A261;
+  --color-accent-cyan: #00f5ff;
+
+  /* Neon Glow Colors (from neon.css) */
+  --neon-cyan: #00f5ff;
+  --neon-purple: #bf00ff;
+  --neon-pink: #ff006e;
+  --neon-green: #00ff88;
+
+  /* Border Neon */
+  --border-neon: rgba(0, 245, 255, 0.15);
 
   /* Text Colors */
   --color-text-primary: #E8E8F0;
@@ -26,6 +36,7 @@
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-ui: 'Rajdhani', sans-serif;
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -49,11 +60,13 @@
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-glow-purple: 0 0 20px rgba(123, 47, 190, 0.3);
   --shadow-glow-blue: 0 0 20px rgba(0, 180, 216, 0.3);
+  --shadow-glow-cyan: 0 0 20px rgba(0, 245, 255, 0.35);
 
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 400ms ease;
+  --transition-neon: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ─── Reset & Base ─────────────────────────────────────────────────────────── */
@@ -79,6 +92,19 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* ─── Background Grid (from neon.css) ──────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0, 245, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 255, 0.015) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ─── Typography ───────────────────────────────────────────────────────────── */
@@ -116,10 +142,10 @@ code, pre {
   font-family: var(--font-mono);
 }
 
-/* ─── Scrollbar Styling ────────────────────────────────────────────────────── */
+/* ─── Scrollbar Styling (neon gradient) ────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -127,12 +153,12 @@ code, pre {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-full);
+  background: linear-gradient(180deg, var(--neon-cyan), var(--color-accent-purple));
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-purple);
+  background: linear-gradient(180deg, var(--color-accent-purple), var(--neon-cyan));
 }
 
 /* ─── Selection ────────────────────────────────────────────────────────────── */
@@ -164,6 +190,10 @@ code, pre {
   color: var(--color-accent-amber) !important;
 }
 
+.text-accent-cyan {
+  color: var(--neon-cyan) !important;
+}
+
 .font-display {
   font-family: var(--font-display) !important;
 }
@@ -172,20 +202,26 @@ code, pre {
   font-family: var(--font-mono) !important;
 }
 
+.font-ui {
+  font-family: var(--font-ui) !important;
+}
+
 /* ─── Bootstrap Overrides (Dark Theme) ─────────────────────────────────────── */
 .btn-primary {
-  background-color: var(--color-accent-purple);
-  border-color: var(--color-accent-purple);
+  background: linear-gradient(135deg, var(--color-accent-purple), #9b3fd4);
+  border: none;
   font-family: var(--font-body);
   font-weight: 600;
   border-radius: var(--radius-sm);
-  transition: all var(--transition-base);
+  transition: all var(--transition-neon);
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-primary:hover {
-  background-color: #6a28a6;
-  border-color: #6a28a6;
+  background: linear-gradient(135deg, #6a28a6, var(--color-accent-purple));
   box-shadow: var(--shadow-glow-purple);
+  transform: translateY(-1px);
 }
 
 .btn-outline-primary {
@@ -194,25 +230,42 @@ code, pre {
   font-family: var(--font-body);
   font-weight: 600;
   border-radius: var(--radius-sm);
-  transition: all var(--transition-base);
+  transition: all var(--transition-neon);
 }
 
 .btn-outline-primary:hover {
   background-color: var(--color-accent-purple);
   border-color: var(--color-accent-purple);
   box-shadow: var(--shadow-glow-purple);
+  transform: translateY(-1px);
 }
 
 .card {
   background-color: var(--color-bg-surface);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-neon);
   border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-neon), box-shadow var(--transition-neon);
+}
+
+.card:hover {
+  border-color: rgba(0, 245, 255, 0.3);
+}
+
+.nav-link:hover,
+footer a.text-muted:hover {
+  color: var(--color-accent-cyan) !important;
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
+}
+
+footer a.text-muted {
+  transition: color var(--transition-neon), text-shadow var(--transition-neon);
 }
 
 .form-control,
 .form-select {
   background-color: var(--color-bg-elevated);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-neon);
   color: var(--color-text-primary);
   border-radius: var(--radius-sm);
   font-family: var(--font-body);
@@ -222,9 +275,9 @@ code, pre {
 .form-control:focus,
 .form-select:focus {
   background-color: var(--color-bg-elevated);
-  border-color: var(--color-accent-purple);
+  border-color: var(--neon-cyan);
   color: var(--color-text-primary);
-  box-shadow: 0 0 0 0.2rem rgba(123, 47, 190, 0.25);
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.15);
 }
 
 .form-control::placeholder {
@@ -233,13 +286,13 @@ code, pre {
 
 .modal-content {
   background-color: var(--color-bg-surface);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-neon);
   border-radius: var(--radius-lg);
 }
 
 .dropdown-menu {
   background-color: var(--color-bg-surface);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-neon);
   border-radius: var(--radius-md);
 }
 
@@ -253,16 +306,77 @@ code, pre {
   color: var(--color-text-primary);
 }
 
+/* ─── Nav Tabs (neon style) ────────────────────────────────────────────────── */
+.nav-tabs .nav-link {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all var(--transition-neon);
+  position: relative;
+}
+
+.nav-tabs .nav-link.active {
+  text-shadow: 0 0 8px rgba(123, 47, 190, 0.4);
+}
+
+/* ─── Neon Divider ─────────────────────────────────────────────────────────── */
+.neon-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-neon), transparent);
+  margin: 2rem 0;
+}
+
+/* ─── Section Title (neon underline) ───────────────────────────────────────── */
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 1px;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 60%;
+  background: linear-gradient(90deg, var(--color-accent-purple), transparent);
+  margin-top: 6px;
+  border-radius: 2px;
+}
+
+/* ─── Badge (neon gradient) ────────────────────────────────────────────────── */
+.badge-neon {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--color-accent-purple));
+  color: #08080f;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+}
+
 /* ─── Page Container ───────────────────────────────────────────────────────── */
 .page-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: var(--spacing-lg) var(--spacing-md);
+  position: relative;
+  z-index: 1;
 }
 
 /* ─── Animations ───────────────────────────────────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -276,6 +390,61 @@ code, pre {
   50% { transform: scale(1.05); }
 }
 
+@keyframes neonPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 245, 255, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(0, 245, 255, 0.5), 0 0 50px rgba(191, 0, 255, 0.3); }
+}
+
+@keyframes glowText {
+  0%, 100% { text-shadow: 0 0 8px rgba(0, 245, 255, 0.3); }
+  50% { text-shadow: 0 0 20px rgba(0, 245, 255, 0.7), 0 0 30px rgba(191, 0, 255, 0.3); }
+}
+
 .fade-in {
   animation: fadeIn var(--transition-slow) ease forwards;
+}
+
+.animate-fade-up {
+  animation: fadeInUp 0.6s ease both;
+}
+
+.neon-pulse {
+  animation: neonPulse 2s ease-in-out infinite;
+}
+
+.glow-text {
+  animation: glowText 2s ease-in-out infinite;
+}
+
+/* ─── Skeleton Shimmer ─────────────────────────────────────────────────────── */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 20%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 576px) {
+  .page-container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.2rem; }
 }

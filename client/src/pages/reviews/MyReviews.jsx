@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import reviewService from '../../services/reviewService';
 import ReviewCard from '../../components/media/ReviewCard';
-import FullPageLoader from '../../components/common/Loader';
+import SkeletonCard from '../../components/media/SkeletonCard';
+import EmptyState from '../../components/common/EmptyState';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import toast from 'react-hot-toast';
 
@@ -44,11 +45,9 @@ const MyReviews = () => {
     }
   };
 
-  if (isLoading) return <FullPageLoader />;
-
   return (
     <div className="page-container fade-in">
-      <h1 className="mb-4" style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem' }}>
+      <h1 className="mb-4 section-title">
         My <span className="text-accent-purple">Reviews</span>
       </h1>
 
@@ -58,11 +57,26 @@ const MyReviews = () => {
         </div>
       )}
 
-      {reviews.length === 0 && !error ? (
-        <div className="card p-5 text-center">
-          <h3 className="mb-3">No reviews yet</h3>
-          <p className="text-muted">You haven't reviewed any media yet. Head over to your library or discover page to start reviewing!</p>
+      {isLoading ? (
+        <div className="d-flex gap-3 flex-wrap">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="skeleton-shimmer" style={{
+              width: '100%',
+              height: '150px',
+              backgroundColor: 'var(--color-bg-surface)',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: 'var(--spacing-md)',
+            }} />
+          ))}
         </div>
+      ) : reviews.length === 0 && !error ? (
+        <EmptyState
+          icon="✍️"
+          title="No reviews yet"
+          message="You haven't reviewed any media yet. Head over to your library or discover page to start reviewing!"
+          actionText="Discover Media"
+          actionLink="/discover"
+        />
       ) : (
         <div className="reviews-list">
           {reviews.map(review => (

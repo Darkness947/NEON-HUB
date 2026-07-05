@@ -47,6 +47,7 @@ const FavoriteButton = ({ mediaType, mediaId, isFavorite }) => {
       disabled={isLoading || isUpdating} 
       style={heartStyle} 
       title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
       className="favorite-btn"
     >
       {isFavorite ? '♥' : '♡'}

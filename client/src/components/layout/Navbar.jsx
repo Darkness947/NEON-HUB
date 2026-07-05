@@ -28,20 +28,34 @@ const Navbar = () => {
       className="navbar navbar-expand-lg navbar-dark sticky-top"
       style={{
         backgroundColor: 'rgba(13, 13, 26, 0.95)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid var(--border-neon)',
         zIndex: 1050,
       }}
     >
       <div className="container-fluid px-3 px-lg-4">
-        {/* Brand */}
+        {/* Brand — neon gradient text */}
         <Link
-          className="navbar-brand d-flex align-items-center gap-2"
+          className="navbar-brand d-flex align-items-center gap-1"
           to="/"
-          style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.4rem' }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 700,
+            fontSize: '1.5rem',
+            letterSpacing: '2px',
+            background: 'linear-gradient(135deg, var(--neon-cyan), var(--color-accent-purple))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 0 8px rgba(0, 245, 255, 0.4))',
+            textDecoration: 'none',
+            transition: 'filter 0.3s ease',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.filter = 'drop-shadow(0 0 15px rgba(0, 245, 255, 0.7))'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(0, 245, 255, 0.4))'; }}
         >
-          <span style={{ color: 'var(--color-accent-purple)' }}>NEON</span>
-          <span style={{ color: 'var(--color-accent-blue)' }}>HUB</span>
+          NEON HUB
         </Link>
 
         {/* Mobile Toggle */}
@@ -50,6 +64,7 @@ const Navbar = () => {
           type="button"
           onClick={() => setIsNavCollapsed(!isNavCollapsed)}
           aria-label="Toggle navigation"
+          style={{ borderColor: 'var(--neon-cyan)' }}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -69,19 +84,22 @@ const Navbar = () => {
                 placeholder="Search movies, series, games..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search media"
                 style={{
                   backgroundColor: 'var(--color-bg-elevated)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  border: '1px solid var(--border-neon)',
                   color: 'var(--color-text-primary)',
                   borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)',
+                  transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
                 }}
               />
               <button
                 className="btn btn-outline-primary"
                 type="submit"
+                aria-label="Submit search"
                 style={{
                   borderRadius: '0 var(--radius-sm) var(--radius-sm) 0',
-                  borderColor: 'rgba(255,255,255,0.1)',
+                  borderColor: 'var(--border-neon)',
                 }}
               >
                 🔍
@@ -92,12 +110,12 @@ const Navbar = () => {
           {/* Nav Links */}
           <ul className="navbar-nav ms-auto align-items-center gap-1">
             <li className="nav-item">
-              <Link className="nav-link" to="/" style={{ color: 'var(--color-text-muted)' }}>
+              <Link className="nav-link" to="/" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px', transition: 'color 0.3s ease' }}>
                 Home
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/discover" style={{ color: 'var(--color-text-muted)' }}>
+              <Link className="nav-link" to="/discover" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px', transition: 'color 0.3s ease' }}>
                 Discover
               </Link>
             </li>
@@ -105,12 +123,12 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard" style={{ color: 'var(--color-text-muted)' }}>
+                  <Link className="nav-link" to="/dashboard" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px' }}>
                     Dashboard
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/library" style={{ color: 'var(--color-text-muted)' }}>
+                  <Link className="nav-link" to="/library" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px' }}>
                     Library
                   </Link>
                 </li>
@@ -120,28 +138,31 @@ const Navbar = () => {
                   <button
                     className="btn btn-link nav-link d-flex align-items-center gap-2 p-0"
                     onClick={() => setShowDropdown(!showDropdown)}
+                    aria-label="User menu"
+                    aria-expanded={showDropdown}
                     style={{ textDecoration: 'none' }}
                   >
                     <div
                       style={{
-                        width: '32px',
-                        height: '32px',
+                        width: '34px',
+                        height: '34px',
                         borderRadius: '50%',
-                        backgroundColor: 'var(--color-accent-purple)',
+                        background: 'linear-gradient(135deg, var(--color-accent-purple), var(--neon-cyan))',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '0.85rem',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         color: '#fff',
-                        border: '2px solid var(--color-accent-blue)',
+                        boxShadow: '0 0 12px rgba(0, 245, 255, 0.3)',
+                        transition: 'box-shadow 0.3s ease',
                       }}
                     >
                       {user?.username?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <span
                       className="d-none d-lg-inline"
-                      style={{ color: 'var(--color-text-primary)', fontSize: '0.9rem' }}
+                      style={{ color: 'var(--color-text-primary)', fontSize: '0.9rem', fontFamily: 'var(--font-ui)', fontWeight: 600 }}
                     >
                       {user?.username}
                     </span>
@@ -157,47 +178,27 @@ const Navbar = () => {
                         marginTop: '8px',
                         minWidth: '180px',
                         backgroundColor: 'var(--color-bg-surface)',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        border: '1px solid var(--border-neon)',
                         borderRadius: 'var(--radius-md)',
-                        boxShadow: 'var(--shadow-lg)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 245, 255, 0.1)',
                       }}
                     >
-                      <Link
-                        className="dropdown-item py-2"
-                        to="/profile"
-                        onClick={() => setShowDropdown(false)}
-                      >
+                      <Link className="dropdown-item py-2" to="/profile" onClick={() => setShowDropdown(false)}>
                         👤 Profile
                       </Link>
-                      <Link
-                        className="dropdown-item py-2"
-                        to="/favorites"
-                        onClick={() => setShowDropdown(false)}
-                      >
+                      <Link className="dropdown-item py-2" to="/favorites" onClick={() => setShowDropdown(false)}>
                         ❤️ Favorites
                       </Link>
-                      <Link
-                        className="dropdown-item py-2"
-                        to="/reviews"
-                        onClick={() => setShowDropdown(false)}
-                      >
+                      <Link className="dropdown-item py-2" to="/reviews" onClick={() => setShowDropdown(false)}>
                         ✍️ My Reviews
                       </Link>
-                      <Link
-                        className="dropdown-item py-2"
-                        to="/lists"
-                        onClick={() => setShowDropdown(false)}
-                      >
+                      <Link className="dropdown-item py-2" to="/lists" onClick={() => setShowDropdown(false)}>
                         📋 Custom Lists
                       </Link>
-                      <Link
-                        className="dropdown-item py-2"
-                        to="/settings"
-                        onClick={() => setShowDropdown(false)}
-                      >
+                      <Link className="dropdown-item py-2" to="/settings" onClick={() => setShowDropdown(false)}>
                         ⚙️ Settings
                       </Link>
-                      <hr className="dropdown-divider" style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+                      <hr className="dropdown-divider" style={{ borderColor: 'var(--border-neon)' }} />
                       <button
                         className="dropdown-item py-2"
                         onClick={handleLogout}

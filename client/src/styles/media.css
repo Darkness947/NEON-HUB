@@ -5,11 +5,11 @@
   height: 270px;
   border-radius: var(--radius-md);
   background-color: var(--color-bg-surface);
+  border: 1px solid var(--border-neon);
   position: relative;
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  transition: transform var(--transition-neon), box-shadow var(--transition-neon), border-color var(--transition-neon);
   cursor: pointer;
   flex-shrink: 0;
-  border-bottom: 4px solid transparent;
   z-index: 1;
 }
 
@@ -18,9 +18,9 @@
 }
 
 .media-card:hover {
-  transform: scale(1.03);
-  border-bottom-color: var(--color-accent-purple);
-  box-shadow: var(--shadow-glow-purple);
+  transform: translateY(-6px) scale(1.02);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 12px 40px rgba(0, 245, 255, 0.12), 0 0 20px rgba(191, 0, 255, 0.08);
 }
 
 .media-card-poster {
@@ -53,7 +53,7 @@
   height: 100%;
   background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);
   opacity: 0;
-  transition: opacity var(--transition-base);
+  transition: opacity var(--transition-neon);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -78,6 +78,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  backdrop-filter: blur(4px);
 }
 
 .media-card-favorite {
@@ -86,12 +87,13 @@
   right: var(--spacing-sm);
   color: var(--color-text-primary);
   opacity: 0.7;
-  transition: opacity var(--transition-fast), color var(--transition-fast);
+  transition: opacity var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .media-card-favorite:hover, .media-card-favorite.active {
   opacity: 1;
   color: var(--color-danger);
+  transform: scale(1.15);
 }
 
 .media-card-title {
@@ -126,7 +128,7 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-neon);
 }
 
 .skeleton-poster {
@@ -159,20 +161,21 @@
   border-radius: var(--radius-sm);
 }
 
+/* Shimmer effect for skeleton cards */
 .skeleton-card::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
 }
 
 /* ─── Media Grid ───────────────────────────────────────────────────────────── */
@@ -188,10 +191,10 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(13, 13, 26, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 13, 26, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-neon);
   color: rgba(255, 255, 255, 0.7);
   width: 46px;
   height: 46px;
@@ -200,17 +203,17 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-neon);
   z-index: 10;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .hero-arrow:hover {
   background: rgba(123, 47, 190, 0.3);
-  border-color: var(--color-accent-purple);
+  border-color: var(--neon-cyan);
   color: #fff;
-  transform: translateY(-50%) scale(1.08);
-  box-shadow: var(--shadow-glow-purple);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-glow-cyan);
 }
 
 .hero-arrow:active {
@@ -223,4 +226,30 @@
 
 .hero-arrow-right {
   right: 20px;
+}
+
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 576px) {
+  .media-card {
+    width: 150px;
+    height: 225px;
+  }
+
+  .skeleton-card {
+    width: 150px;
+    height: 225px;
+  }
+
+  .media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+  }
+
+  .hero-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-arrow-left { left: 8px; }
+  .hero-arrow-right { right: 8px; }
 }

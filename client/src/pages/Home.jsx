@@ -203,7 +203,7 @@ const Home = () => {
       {/* Trending Movies Row */}
       <div className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0">Trending Movies</h3>
+          <h3 className="mb-0 section-title">Trending Movies</h3>
           <Link to="/discover?tab=movies" className="text-accent-blue">See All →</Link>
         </div>
         <div 
@@ -222,7 +222,7 @@ const Home = () => {
       {/* Popular TV Series Row */}
       <div className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0">Trending TV Series</h3>
+          <h3 className="mb-0 section-title">Trending TV Series</h3>
           <Link to="/discover?tab=series" className="text-accent-blue">See All →</Link>
         </div>
         <div 
@@ -241,7 +241,7 @@ const Home = () => {
       {/* Trending Games Row */}
       <div className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0">Trending Games</h3>
+          <h3 className="mb-0 section-title">Trending Games</h3>
           <Link to="/discover?tab=games" className="text-accent-blue">See All →</Link>
         </div>
         <div 

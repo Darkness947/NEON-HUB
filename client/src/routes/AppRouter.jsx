@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 
 // Layout
 import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 
 // Pages
 import Home from '../pages/Home';
@@ -35,12 +36,15 @@ const GuestRoute = () => {
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Outlet />;
 };
 
-// ─── Main Layout (with Navbar) ────────────────────────────────────────────────
+// ─── Main Layout (with Navbar and Footer) ─────────────────────────────────────
 const MainLayout = () => (
-  <>
+  <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
     <Navbar />
-    <Outlet />
-  </>
+    <main style={{ flex: 1 }}>
+      <Outlet />
+    </main>
+    <Footer />
+  </div>
 );
 
 // ─── Router ───────────────────────────────────────────────────────────────────

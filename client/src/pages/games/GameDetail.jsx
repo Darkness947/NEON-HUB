@@ -9,6 +9,7 @@ import { getStatusColor } from '../../utils/getStatusColor';
 import FavoriteButton from '../../components/media/FavoriteButton';
 import ReviewModal from '../../components/media/ReviewModal';
 import AddToListModal from '../../components/media/AddToListModal';
+import SkeletonDetail from '../../components/common/SkeletonDetail';
 import toast from 'react-hot-toast';
 
 const GameDetail = () => {
@@ -84,13 +85,7 @@ const GameDetail = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="page-container fade-in">
-        <div style={{ height: '400px', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-lg)' }} className="mb-4"></div>
-        <div style={{ height: '20px', width: '50%', backgroundColor: 'var(--color-bg-elevated)', marginBottom: '10px' }}></div>
-        <div style={{ height: '20px', width: '80%', backgroundColor: 'var(--color-bg-elevated)' }}></div>
-      </div>
-    );
+    return <SkeletonDetail />;
   }
 
   if (error || !game) {

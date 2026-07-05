@@ -9,6 +9,8 @@ import { getStatusColor } from '../../utils/getStatusColor';
 import FavoriteButton from '../../components/media/FavoriteButton';
 import ReviewModal from '../../components/media/ReviewModal';
 import AddToListModal from '../../components/media/AddToListModal';
+import SkeletonDetail from '../../components/common/SkeletonDetail';
+import ScrollableRow from '../../components/common/ScrollableRow';
 import toast from 'react-hot-toast';
 
 const MovieDetail = () => {
@@ -85,13 +87,7 @@ const MovieDetail = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="page-container fade-in">
-        <div style={{ height: '400px', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-lg)' }} className="mb-4"></div>
-        <div style={{ height: '20px', width: '50%', backgroundColor: 'var(--color-bg-elevated)', marginBottom: '10px' }}></div>
-        <div style={{ height: '20px', width: '80%', backgroundColor: 'var(--color-bg-elevated)' }}></div>
-      </div>
-    );
+    return <SkeletonDetail />;
   }
 
   if (error || !movie) {
@@ -206,8 +202,8 @@ const MovieDetail = () => {
         {/* Cast Section */}
         {movie.cast && movie.cast.length > 0 && (
           <div className="mb-5">
-            <h3 className="mb-4">Top Billed Cast</h3>
-            <div className="d-flex gap-3" style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}>
+            <h3 className="mb-4">Cast</h3>
+            <ScrollableRow>
               {movie.cast.map(person => (
                 <div key={person.id} className="card" style={{ minWidth: '140px', backgroundColor: 'var(--color-bg-surface)', border: 'none', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
                   {person.profile_url ? (
@@ -221,7 +217,7 @@ const MovieDetail = () => {
                   </div>
                 </div>
               ))}
-            </div>
+            </ScrollableRow>
           </div>
         )}
         
@@ -266,11 +262,11 @@ const MovieDetail = () => {
         {movie.similar && movie.similar.length > 0 && (
           <div>
             <h3 className="mb-4">Similar Movies</h3>
-            <div className="d-flex gap-3" style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}>
+            <ScrollableRow>
               {movie.similar.map(sim => (
                 <MediaCard key={sim.tmdb_id} {...sim} />
               ))}
-            </div>
+            </ScrollableRow>
           </div>
         )}
       </div>

@@ -9,6 +9,8 @@ import { getStatusColor } from '../../utils/getStatusColor';
 import FavoriteButton from '../../components/media/FavoriteButton';
 import ReviewModal from '../../components/media/ReviewModal';
 import AddToListModal from '../../components/media/AddToListModal';
+import SkeletonDetail from '../../components/common/SkeletonDetail';
+import ScrollableRow from '../../components/common/ScrollableRow';
 import toast from 'react-hot-toast';
 
 const SeriesDetail = () => {
@@ -84,11 +86,7 @@ const SeriesDetail = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="page-container fade-in">
-        <div style={{ height: '400px', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-lg)' }} className="mb-4"></div>
-      </div>
-    );
+    return <SkeletonDetail />;
   }
 
   if (error || !series) {
@@ -229,8 +227,8 @@ const SeriesDetail = () => {
         {/* Cast Section */}
         {series.cast && series.cast.length > 0 && (
           <div className="mb-5">
-            <h3 className="mb-4">Series Cast</h3>
-            <div className="d-flex gap-3" style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}>
+            <h3 className="mb-4">Cast</h3>
+            <ScrollableRow>
               {series.cast.map(person => (
                 <div key={person.id} className="card" style={{ minWidth: '140px', backgroundColor: 'var(--color-bg-surface)', border: 'none', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
                   {person.profile_url ? (
@@ -244,7 +242,7 @@ const SeriesDetail = () => {
                   </div>
                 </div>
               ))}
-            </div>
+            </ScrollableRow>
           </div>
         )}
 
@@ -289,11 +287,11 @@ const SeriesDetail = () => {
         {series.similar && series.similar.length > 0 && (
           <div>
             <h3 className="mb-4">Similar Series</h3>
-            <div className="d-flex gap-3" style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}>
+            <ScrollableRow>
               {series.similar.map(sim => (
                 <MediaCard key={sim.tmdb_id} {...sim} />
               ))}
-            </div>
+            </ScrollableRow>
           </div>
         )}
       </div>

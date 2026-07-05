@@ -4,6 +4,7 @@ import mediaService from '../services/mediaService';
 import MediaCard from '../components/media/MediaCard';
 import GameCard from '../components/media/GameCard';
 import SkeletonCard from '../components/media/SkeletonCard';
+import EmptyState from '../components/common/EmptyState';
 
 const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -118,7 +119,15 @@ const SearchResults = () => {
               : <MediaCard key={item.tmdb_id} {...item} />
           ))
         ) : (
-          <div className="text-muted" style={{ gridColumn: '1 / -1' }}>No results found.</div>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <EmptyState
+              icon="🔍"
+              title="No results found"
+              message={`We couldn't find any ${activeTab} matching "${query}". Try a different search term.`}
+              actionText="Browse Discover"
+              actionLink="/discover"
+            />
+          </div>
         )}
       </div>
     </div>

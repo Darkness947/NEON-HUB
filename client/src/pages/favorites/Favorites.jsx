@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { useLibrary } from '../../hooks/useLibrary';
 import MediaCard from '../../components/media/MediaCard';
 import GameCard from '../../components/media/GameCard';
+import SkeletonCard from '../../components/media/SkeletonCard';
+import EmptyState from '../../components/common/EmptyState';
 
 const Favorites = () => {
   const { movies, series, games, isLoading } = useLibrary();
@@ -15,19 +17,6 @@ const Favorites = () => {
     };
   }, [movies, series, games]);
 
-  if (isLoading) {
-    return (
-      <div className="page-container fade-in">
-        <h1 className="mb-4">Favorites</h1>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          {[1,2,3,4,5].map(i => (
-            <div key={i} style={{ width: '200px', height: '300px', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-md)' }}></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   const getActiveItems = () => {
     if (activeTab === 'movies') return favorites.movies;
     if (activeTab === 'series') return favorites.series;
@@ -38,36 +27,53 @@ const Favorites = () => {
   const items = getActiveItems();
   const totalCount = favorites.movies.length + favorites.series.length + favorites.games.length;
 
+  const tabs = [
+    { key: 'all', label: 'All', count: totalCount },
+    { key: 'movies', label: 'Movies', count: favorites.movies.length },
+    { key: 'series', label: 'Series', count: favorites.series.length },
+    { key: 'games', label: 'Games', count: favorites.games.length },
+  ];
+
   return (
     <div className="page-container fade-in">
-      <h1 className="mb-4" style={{ fontFamily: 'var(--font-display)' }}>Favorites</h1>
+      <h1 className="mb-4 section-title">Favorites</h1>
       
       <ul className="nav nav-tabs mb-4 border-0" style={{ gap: '10px' }}>
-        {['all', 'movies', 'series', 'games'].map(tab => (
-          <li className="nav-item" key={tab}>
+        {tabs.map(tab => (
+          <li className="nav-item" key={tab.key}>
             <button
-              className={`nav-link ${activeTab === tab ? 'active' : ''}`}
+              className={`nav-link ${activeTab === tab.key ? 'active' : ''}`}
               style={{
-                backgroundColor: activeTab === tab ? 'var(--color-primary)' : 'transparent',
-                color: activeTab === tab ? 'white' : 'var(--color-text-secondary)',
-                border: activeTab === tab ? 'none' : '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-pill)',
-                padding: '8px 24px'
+                backgroundColor: activeTab === tab.key ? 'var(--color-accent-purple)' : 'transparent',
+                color: activeTab === tab.key ? '#fff' : 'var(--color-text-muted)',
+                border: activeTab === tab.key ? 'none' : '1px solid var(--border-neon)',
+                borderRadius: 'var(--radius-full)',
+                padding: '8px 24px',
+                fontFamily: 'var(--font-ui)',
+                fontWeight: 600,
+                letterSpacing: '0.5px',
+                transition: 'all var(--transition-neon)',
               }}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(tab.key)}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} ({tab === 'all' ? totalCount : tab === 'movies' ? favorites.movies.length : tab === 'series' ? favorites.series.length : favorites.games.length})
+              {tab.label} ({tab.count})
             </button>
           </li>
         ))}
       </ul>
 
-      {items.length === 0 ? (
-        <div className="text-center py-5" style={{ backgroundColor: 'var(--color-bg-surface)', borderRadius: 'var(--radius-lg)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>♥</div>
-          <h3 className="text-muted mb-3">No {activeTab === 'all' ? 'favorites' : activeTab} yet</h3>
-          <p className="text-secondary">Click the heart icon on any media card to add it to your favorites.</p>
+      {isLoading ? (
+        <div className="media-grid">
+          {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon="♥"
+          title={`No ${activeTab === 'all' ? 'favorites' : activeTab} yet`}
+          message="Click the heart icon on any media card to add it to your favorites."
+          actionText="Discover Media"
+          actionLink="/discover"
+        />
       ) : (
         <div className="media-grid">
           {items.map(item => (

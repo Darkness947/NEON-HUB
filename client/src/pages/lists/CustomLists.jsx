@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import listService from '../../services/listService';
-import FullPageLoader from '../../components/common/Loader';
+import EmptyState from '../../components/common/EmptyState';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import toast from 'react-hot-toast';
 import { formatDate } from '../../utils/formatDate';
@@ -72,7 +72,25 @@ const CustomLists = () => {
     }
   };
 
-  if (isLoading) return <FullPageLoader />;
+  if (isLoading) {
+    return (
+      <div className="page-container fade-in">
+        <h1 className="mb-4 section-title">My <span className="text-accent-purple">Lists</span></h1>
+        <div className="row g-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div className="col-12 col-md-6 col-lg-4" key={i}>
+              <div className="skeleton-shimmer" style={{
+                height: '180px',
+                backgroundColor: 'var(--color-bg-surface)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-neon)',
+              }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container fade-in">
@@ -92,15 +110,13 @@ const CustomLists = () => {
       )}
 
       {lists.length === 0 && !error ? (
-        <div className="card p-5 text-center">
-          <h3 className="mb-3">No lists yet</h3>
-          <p className="text-muted mb-4">You haven't created any custom lists. Curate your favorite movies, series, and games!</p>
-          <div>
-            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-              Create Your First List
-            </button>
-          </div>
-        </div>
+        <EmptyState
+          icon="📋"
+          title="No lists yet"
+          message="You haven't created any custom lists. Curate your favorite movies, series, and games!"
+          actionText="Create Your First List"
+          onAction={() => setShowModal(true)}
+        />
       ) : (
         <div className="row g-4">
           {lists.map(list => (
