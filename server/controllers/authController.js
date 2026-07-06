@@ -256,6 +256,86 @@ const changePassword = asyncHandler(async (req, res) => {
   });
 });
 
+// ─── Forgot Password ────────────────────────────────────────────────────────────
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) throw new AppError('Email is required', 400, 'VALIDATION_ERROR');
+
+  const user = await userModel.findUserByEmail(email);
+  if (!user) {
+    // Return 200 even if user not found to prevent email enumeration
+    return res.status(200).json({ success: true, data: { message: 'If that email is registered, a reset link was sent.' } });
+  }
+
+  // Create a JWT valid for 15 minutes, signed with user's old password hash so it's invalidated upon use
+  const resetSecret = process.env.JWT_SECRET + user.password;
+  const resetToken = jwt.sign({ userId: user.id }, resetSecret, { expiresIn: '15m' });
+
+  const { sendPasswordResetEmail } = require('../services/emailService');
+  try {
+    await sendPasswordResetEmail(user.email, `${user.id}-${resetToken}`);
+  } catch (error) {
+    console.error('Failed to send reset email', error);
+    throw new AppError('Failed to send reset email. Try again later.', 500);
+  }
+
+  res.status(200).json({ success: true, data: { message: 'If that email is registered, a reset link was sent.' } });
+});
+
+// ─── Reset Password ───────────────────────────────────────────────────────────
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword) throw new AppError('Token and new password required', 400, 'VALIDATION_ERROR');
+
+  const [userIdStr, ...jwtParts] = token.split('-');
+  const resetJwt = jwtParts.join('-');
+  const userId = parseInt(userIdStr, 10);
+
+  const user = await userModel.findUserById(userId);
+  if (!user) throw new AppError('Invalid or expired reset token', 400, 'INVALID_TOKEN');
+  
+  // We need the password hash to verify the token
+  const userWithPass = await userModel.findUserByEmail(user.email);
+  const resetSecret = process.env.JWT_SECRET + userWithPass.password;
+
+  try {
+    jwt.verify(resetJwt, resetSecret);
+  } catch (err) {
+    throw new AppError('Invalid or expired reset token', 400, 'INVALID_TOKEN');
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+  await userModel.updatePassword(user.id, hashedPassword);
+  await userModel.deleteAllRefreshTokensForUser(user.id);
+
+  res.status(200).json({ success: true, data: { message: 'Password has been reset successfully' } });
+});
+
+// ─── Upload Avatar ────────────────────────────────────────────────────────────
+
+const uploadAvatar = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new AppError('No image file provided', 400, 'VALIDATION_ERROR');
+  }
+
+  // req.file.path contains the Cloudinary secure_url
+  let avatarUrl = req.file.path;
+  
+  // Inject transformation string for auto-resizing
+  // Cloudinary URLs look like: https://res.cloudinary.com/cloud_name/image/upload/v1234567/avatars/user-1.jpg
+  const uploadIndex = avatarUrl.indexOf('/upload/') + 8;
+  avatarUrl = avatarUrl.substring(0, uploadIndex) + 'c_fill,g_face,h_200,w_200/' + avatarUrl.substring(uploadIndex);
+
+  const updatedUser = await userModel.updateAvatar(req.user.id, avatarUrl);
+
+  res.status(200).json({
+    success: true,
+    data: { user: _formatUser(updatedUser) },
+  });
+});
+
 module.exports = {
   register,
   login,
@@ -263,4 +343,7 @@ module.exports = {
   logout,
   getProfile,
   changePassword,
+  forgotPassword,
+  resetPassword,
+  uploadAvatar,
 };

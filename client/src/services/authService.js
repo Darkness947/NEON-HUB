@@ -40,6 +40,25 @@ const authService = {
     });
     return data.data;
   },
+
+  uploadAvatar: async (formData) => {
+    const { data } = await api.post('/api/auth/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data.data;
+  },
+
+  forgotPassword: async (email) => {
+    const { data } = await api.post('/api/auth/forgot-password', { email });
+    return data.data;
+  },
+
+  resetPassword: async (token, newPassword) => {
+    const { data } = await api.post('/api/auth/reset-password', { token, newPassword });
+    return data.data;
+  },
 };
 
 export default authService;

@@ -86,9 +86,14 @@ const Login = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="login-password" className="form-label text-light" style={{ fontSize: '0.9rem' }}>
-              Password
-            </label>
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <label htmlFor="login-password" className="form-label text-light mb-0" style={{ fontSize: '0.9rem' }}>
+                Password
+              </label>
+              <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--color-accent-blue)', textDecoration: 'none' }}>
+                Forgot Password?
+              </Link>
+            </div>
             <input
               type="password"
               className="form-control"

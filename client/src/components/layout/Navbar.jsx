@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import defaultAvatar from '../../assets/images/default_avatar.png';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -147,18 +148,18 @@ const Navbar = () => {
                         width: '34px',
                         height: '34px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--color-accent-purple), var(--neon-cyan))',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.85rem',
-                        fontWeight: 700,
-                        color: '#fff',
-                        boxShadow: '0 0 12px rgba(0, 245, 255, 0.3)',
+                        overflow: 'hidden',
+                        border: '2px solid var(--neon-cyan)',
+                        boxShadow: '0 0 8px rgba(0, 245, 255, 0.3)',
                         transition: 'box-shadow 0.3s ease',
                       }}
                     >
-                      {user?.username?.charAt(0).toUpperCase() || 'U'}
+                      <img 
+                        src={user?.avatar_url || defaultAvatar} 
+                        alt="Avatar" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
+                      />
                     </div>
                     <span
                       className="d-none d-lg-inline"
