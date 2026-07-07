@@ -17,6 +17,8 @@ const getStats = async (userId) => {
           SELECT rating FROM tracked_series WHERE user_id = $1 AND rating IS NOT NULL
           UNION ALL
           SELECT rating FROM tracked_games WHERE user_id = $1 AND rating IS NOT NULL
+          UNION ALL
+          SELECT rating FROM tracked_episodes WHERE user_id = $1 AND rating IS NOT NULL
         ) AS all_ratings
       ) as avg_rating`
     ,

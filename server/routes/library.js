@@ -12,4 +12,13 @@ router.delete('/remove', libraryController.removeFromLibrary);
 router.get('/', libraryController.getLibrary);
 router.get('/favorites', libraryController.getFavorites);
 
+// Episodes
+router.post('/episode', libraryController.trackEpisode);
+router.put('/episode', libraryController.updateEpisode);
+router.delete('/episode', libraryController.deleteEpisode);
+router.get('/series/:id/episodes', libraryController.getSeriesEpisodes);
+
+// Ratings
+router.get('/ratings', libraryController.getRatings);
+
 module.exports = router;

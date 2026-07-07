@@ -190,6 +190,9 @@ const Navbar = () => {
                       <Link className="dropdown-item py-2" to="/favorites" onClick={() => setShowDropdown(false)}>
                         ❤️ Favorites
                       </Link>
+                      <Link className="dropdown-item py-2" to="/ratings" onClick={() => setShowDropdown(false)}>
+                        ⭐ My Ratings
+                      </Link>
                       <Link className="dropdown-item py-2" to="/reviews" onClick={() => setShowDropdown(false)}>
                         ✍️ My Reviews
                       </Link>

@@ -25,6 +25,8 @@ import ListDetail from '../pages/lists/ListDetail';
 import MyReviews from '../pages/reviews/MyReviews';
 import Profile from '../pages/profile/Profile';
 import Settings from '../pages/profile/Settings';
+import MyRatings from '../pages/profile/MyRatings';
+import Contact from '../pages/Contact';
 
 // ─── Protected Route Wrapper ──────────────────────────────────────────────────
 const ProtectedRoute = () => {
@@ -59,10 +61,11 @@ const AppRouter = () => {
           {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/discover" element={<Discover />} />
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/movies/:id" element={<MovieDetail />} />
           <Route path="/series/:id" element={<SeriesDetail />} />
           <Route path="/games/:id" element={<GameDetail />} />
-          <Route path="/search" element={<SearchResults />} />
 
           {/* Guest-only routes (redirect authenticated users) */}
           <Route element={<GuestRoute />}>
@@ -79,6 +82,7 @@ const AppRouter = () => {
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/lists" element={<CustomLists />} />
             <Route path="/lists/:id" element={<ListDetail />} />
+            <Route path="/ratings" element={<MyRatings />} />
             <Route path="/reviews" element={<MyReviews />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />

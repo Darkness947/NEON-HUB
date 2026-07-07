@@ -177,6 +177,7 @@ const getSeriesSeason = async (id, seasonNumber) => {
     poster_url: buildImageUrl(data.poster_path),
     episodes: data.episodes?.map(e => ({
       id: e.id,
+      season_number: data.season_number,
       episode_number: e.episode_number,
       name: e.name,
       overview: e.overview,
@@ -185,6 +186,25 @@ const getSeriesSeason = async (id, seasonNumber) => {
       still_url: buildImageUrl(e.still_path),
       vote_average: e.vote_average,
     })) || [],
+  };
+};
+
+const getEpisodeBasic = async (seriesId, seasonNumber, episodeNumber) => {
+  // First get the series to get the series title and poster fallback
+  const seriesData = await getSeriesBasic(seriesId);
+  const { data } = await tmdbApi.get(`/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`);
+  return {
+    id: data.id,
+    series_title: seriesData.title,
+    title: `${seriesData.title} - S${seasonNumber}E${episodeNumber}: ${data.name}`,
+    poster_url: buildImageUrl(data.still_path) || seriesData.poster_url,
+    backdrop_url: seriesData.backdrop_url,
+    season_number: data.season_number,
+    episode_number: data.episode_number,
+    air_date: data.air_date,
+    vote_average: data.vote_average,
+    overview: data.overview,
+    media_type: 'episode',
   };
 };
 
@@ -199,7 +219,15 @@ const getPopularSeries = async (page = 1) => {
     results: data.results.map(cleanSeries),
     page: data.page,
     total_pages: data.total_pages,
-    total_results: data.total_results,
+  };
+};
+
+const getUpcomingSeries = async (page = 1) => {
+  const { data } = await tmdbApi.get('/tv/on_the_air', { params: { page } });
+  return {
+    results: data.results.map(cleanSeries),
+    page: data.page,
+    total_pages: data.total_pages,
   };
 };
 
@@ -209,11 +237,14 @@ module.exports = {
   getUpcomingMovies,
   searchMovies,
   getMovieById,
+  getMovieBasic,
+  
   getTrendingSeries,
   getPopularSeries,
+  getUpcomingSeries,
   searchSeries,
   getSeriesById,
-  getSeriesSeason,
-  getMovieBasic,
   getSeriesBasic,
+  getSeriesSeason,
+  getEpisodeBasic,
 };

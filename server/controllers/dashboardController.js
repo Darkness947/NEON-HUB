@@ -29,11 +29,12 @@ const getActivity = asyncHandler(async (req, res) => {
   
   const hydratedActivity = await Promise.all(
     activity.map(async (log) => {
-      // Create a mock item to pass to hydrateItem
       const mockItem = {
         id: log.id,
         media_id: log.media_id,
-        media_type: log.media_type
+        media_type: log.media_type,
+        ...(log.meta?.season_number !== undefined && { season_number: log.meta.season_number }),
+        ...(log.meta?.episode_number !== undefined && { episode_number: log.meta.episode_number })
       };
       
       const hydrated = await hydrateItem(mockItem, log.media_type);

@@ -17,6 +17,8 @@ const hydrateItem = async (item, type) => {
       mediaData = await tmdbService.getSeriesBasic(tId);
     } else if (type === 'games' || type === 'game') {
       mediaData = await rawgService.getGameBasic(rId);
+    } else if (type === 'episode') {
+      mediaData = await tmdbService.getEpisodeBasic(tId, item.season_number, item.episode_number);
     }
     
     const { id: dbId, ...itemProps } = item;

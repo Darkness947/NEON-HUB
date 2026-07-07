@@ -306,9 +306,97 @@ const getFavorites = async (userId) => {
   return result.rows;
 };
 
+// --- EPISODES ---
+const addEpisode = async (userId, tmdbId, seasonNumber, episodeNumber, status) => {
+  const result = await pool.query(
+    `INSERT INTO tracked_episodes (user_id, tmdb_id, season_number, episode_number, status)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
+    [userId, tmdbId, seasonNumber, episodeNumber, status]
+  );
+  return result.rows[0];
+};
+
+const updateEpisode = async (userId, tmdbId, seasonNumber, episodeNumber, fields) => {
+  const allowed = ['status', 'rating', 'review'];
+  const updates = [];
+  const values = [];
+  let i = 1;
+
+  for (const key of allowed) {
+    if (fields[key] !== undefined) {
+      updates.push(`${key} = $${i}`);
+      values.push(fields[key]);
+      i++;
+    }
+  }
+
+  if (updates.length === 0) return null;
+
+  values.push(userId, tmdbId, seasonNumber, episodeNumber);
+  const result = await pool.query(
+    `UPDATE tracked_episodes
+     SET ${updates.join(', ')}
+     WHERE user_id = $${i} AND tmdb_id = $${i + 1} AND season_number = $${i + 2} AND episode_number = $${i + 3}
+     RETURNING *`,
+    values
+  );
+  return result.rows[0] || null;
+};
+
+const removeEpisode = async (userId, tmdbId, seasonNumber, episodeNumber) => {
+  const result = await pool.query(
+    `DELETE FROM tracked_episodes
+     WHERE user_id = $1 AND tmdb_id = $2 AND season_number = $3 AND episode_number = $4
+     RETURNING *`,
+    [userId, tmdbId, seasonNumber, episodeNumber]
+  );
+  return result.rows[0] || null;
+};
+
+const getEpisodeEntry = async (userId, tmdbId, seasonNumber, episodeNumber) => {
+  const result = await pool.query(
+    `SELECT * FROM tracked_episodes
+     WHERE user_id = $1 AND tmdb_id = $2 AND season_number = $3 AND episode_number = $4`,
+    [userId, tmdbId, seasonNumber, episodeNumber]
+  );
+  return result.rows[0] || null;
+};
+
+const getSeriesEpisodes = async (userId, tmdbId) => {
+  const result = await pool.query(
+    `SELECT * FROM tracked_episodes
+     WHERE user_id = $1 AND tmdb_id = $2`,
+    [userId, tmdbId]
+  );
+  return result.rows;
+};
+
+// --- RATINGS ---
+const getUserRatings = async (userId) => {
+  const result = await pool.query(
+    `SELECT id, tmdb_id as media_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'movie' as media_type, updated_at as created_at 
+     FROM tracked_movies WHERE user_id = $1 AND rating IS NOT NULL
+     UNION ALL
+     SELECT id, tmdb_id as media_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'series' as media_type, updated_at as created_at 
+     FROM tracked_series WHERE user_id = $1 AND rating IS NOT NULL
+     UNION ALL
+     SELECT id, rawg_id as media_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'game' as media_type, updated_at as created_at 
+     FROM tracked_games WHERE user_id = $1 AND rating IS NOT NULL
+     UNION ALL
+     SELECT id, tmdb_id as media_id, season_number, episode_number, status, rating, review, 'episode' as media_type, created_at 
+     FROM tracked_episodes WHERE user_id = $1 AND rating IS NOT NULL
+     ORDER BY created_at DESC`,
+    [userId]
+  );
+  return result.rows;
+};
+
 module.exports = {
   addMovie, updateMovie, removeMovie, getMovieEntry, getUserMovies,
   addSeries, updateSeries, removeSeries, getSeriesEntry, getUserSeries,
   addGame, updateGame, removeGame, getGameEntry, getUserGames,
-  getFavorites
+  getFavorites,
+  addEpisode, updateEpisode, removeEpisode, getEpisodeEntry, getSeriesEpisodes,
+  getUserRatings
 };

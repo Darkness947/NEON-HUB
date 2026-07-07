@@ -448,3 +448,39 @@ footer a.text-muted {
   h2 { font-size: 1.5rem; }
   h3 { font-size: 1.2rem; }
 }
+
+/* ─── Contact Page Animations ──────────────────────────────────────────────── */
+@keyframes float-glow {
+  0% { transform: translateY(0); filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.2)); }
+  50% { transform: translateY(-12px); filter: drop-shadow(0 0 25px rgba(0, 245, 255, 0.6)); }
+  100% { transform: translateY(0); filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.2)); }
+}
+
+.logo-animate {
+  animation: float-glow 4s ease-in-out infinite;
+  transition: transform var(--transition-base);
+}
+.logo-animate:hover {
+  transform: scale(1.05);
+}
+
+.contact-card {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  background: var(--color-bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.contact-card:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 0 1px var(--neon-cyan);
+  border-color: var(--neon-cyan);
+}
+
+.contact-icon-wrapper {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, filter 0.4s ease;
+}
+
+.contact-card:hover .contact-icon-wrapper {
+  transform: scale(1.2) rotate(8deg);
+  filter: drop-shadow(0 0 12px currentColor);
+}

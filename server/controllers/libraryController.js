@@ -138,10 +138,92 @@ const getFavorites = asyncHandler(async (req, res) => {
   });
 });
 
+// --- EPISODES ---
+const trackEpisode = asyncHandler(async (req, res) => {
+  const { tmdb_id, season_number, episode_number, status } = req.body;
+  if (!tmdb_id || season_number === undefined || episode_number === undefined || !status) {
+    throw new AppError('Missing required episode fields', 400, 'VALIDATION_ERROR');
+  }
+
+  const userId = req.user.id;
+  let entry;
+  try {
+    entry = await libraryModel.addEpisode(userId, tmdb_id, season_number, episode_number, status);
+  } catch (err) {
+    if (err.code === '23505') throw new AppError('Episode already tracked', 409, 'DUPLICATE_ENTRY');
+    throw err;
+  }
+
+  await activityModel.logActivity(userId, 'tracked_episode', 'episode', tmdb_id, { season_number, episode_number });
+
+  const hydrated = await hydrateItem(entry, 'episode');
+  res.status(201).json({ success: true, data: hydrated });
+});
+
+const updateEpisode = asyncHandler(async (req, res) => {
+  const { tmdb_id, season_number, episode_number, ...fields } = req.body;
+  const userId = req.user.id;
+
+  let currentEntry = await libraryModel.getEpisodeEntry(userId, tmdb_id, season_number, episode_number);
+  if (!currentEntry) {
+    // Auto-track as watched if user tries to rate/review an untracked episode
+    currentEntry = await libraryModel.addEpisode(userId, tmdb_id, season_number, episode_number, 'watched');
+  }
+
+  const updatedEntry = await libraryModel.updateEpisode(userId, tmdb_id, season_number, episode_number, fields);
+  
+  if (updatedEntry) {
+    await activityModel.logActivity(userId, 'updated_episode', 'episode', tmdb_id, { season_number, episode_number, ...fields });
+  }
+
+  const hydrated = await hydrateItem(updatedEntry || currentEntry, 'episode');
+  res.status(200).json({ success: true, data: hydrated });
+});
+
+const deleteEpisode = asyncHandler(async (req, res) => {
+  const { tmdb_id, season_number, episode_number } = req.body;
+  const userId = req.user.id;
+
+  const removed = await libraryModel.removeEpisode(userId, tmdb_id, season_number, episode_number);
+  if (!removed) throw new AppError('Episode not tracked', 404, 'NOT_FOUND');
+
+  await activityModel.logActivity(userId, 'removed_episode', 'episode', tmdb_id, { season_number, episode_number });
+
+  res.status(200).json({ success: true, data: { message: 'Episode removed' } });
+});
+
+const getSeriesEpisodes = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const episodes = await libraryModel.getSeriesEpisodes(userId, id);
+  res.status(200).json({ success: true, data: episodes });
+});
+
+// --- RATINGS ---
+const getRatings = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const ratings = await libraryModel.getUserRatings(userId);
+
+  const hydratedRatings = await Promise.all(
+    ratings.map(item => hydrateItem(item, item.media_type))
+  );
+
+  res.status(200).json({
+    success: true,
+    data: hydratedRatings
+  });
+});
+
 module.exports = {
   addToLibrary,
   updateLibrary,
   removeFromLibrary,
   getLibrary,
-  getFavorites
+  getFavorites,
+  trackEpisode,
+  updateEpisode,
+  deleteEpisode,
+  getSeriesEpisodes,
+  getRatings
 };

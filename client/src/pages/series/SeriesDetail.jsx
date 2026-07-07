@@ -11,17 +11,24 @@ import ReviewModal from '../../components/media/ReviewModal';
 import AddToListModal from '../../components/media/AddToListModal';
 import SkeletonDetail from '../../components/common/SkeletonDetail';
 import ScrollableRow from '../../components/common/ScrollableRow';
+import InlineRating from '../../components/media/InlineRating';
+import EpisodeGuide from '../../components/media/EpisodeGuide';
 import toast from 'react-hot-toast';
+import libraryService from '../../services/libraryService';
+import { useAuth } from '../../hooks/useAuth';
 
 const SeriesDetail = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [series, setSeries] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [userEpisodes, setUserEpisodes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviewsError, setReviewsError] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
   
   const { getStatus, isInLibrary, addToLibrary, removeFromLibrary } = useLibrary();
   const currentStatus = getStatus('series', id);
@@ -46,6 +53,15 @@ const SeriesDetail = () => {
           if (!cancelled) setReviews(revData);
         } catch (revErr) {
           if (!cancelled) setReviewsError('Failed to load reviews');
+        }
+
+        if (isAuthenticated) {
+          try {
+            const episodesData = await libraryService.getSeriesEpisodes(id);
+            if (!cancelled) setUserEpisodes(episodesData);
+          } catch (libErr) {
+            console.error('Failed to load user episodes', libErr);
+          }
         }
       } catch (err) {
         if (!cancelled) setError(err.message || 'Failed to load series details');
@@ -144,48 +160,62 @@ const SeriesDetail = () => {
                 <strong>User<br/>Score</strong>
               </div>
               
-              <div className="d-flex align-items-center gap-3">
-                <button 
-                  className="btn px-4 py-2"
-                  style={{
-                    backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onClick={async () => {
-                    if (currentStatus) {
-                      await removeFromLibrary('series', id);
-                    } else {
-                      await addToLibrary('series', id, 'planned');
-                    }
-                  }}
-                  onMouseOver={(e) => {
-                    if (currentStatus) {
-                      e.currentTarget.style.backgroundColor = 'var(--color-danger)';
-                      e.currentTarget.innerText = '✕ Remove from Library';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (currentStatus) {
-                      e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
-                      e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
-                    }
-                  }}
-                >
-                  {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
-                </button>
-                <FavoriteButton mediaType="series" mediaId={id} isFavorite={isFavorite} />
-                <button 
-                  className="btn btn-outline-secondary"
-                  onClick={() => setShowListModal(true)}
-                  title="Add to Custom List"
-                >
-                  + List
-                </button>
+              <div className="d-flex flex-column align-items-start gap-3">
+                <div className="d-flex align-items-center gap-3">
+                  <button 
+                    className="btn px-4 py-2"
+                    style={{
+                      backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '20px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onClick={async () => {
+                      if (currentStatus) {
+                        await removeFromLibrary('series', id);
+                      } else {
+                        await addToLibrary('series', id, 'planned');
+                      }
+                    }}
+                    onMouseOver={(e) => {
+                      if (currentStatus) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-danger)';
+                        e.currentTarget.innerText = '✕ Remove from Library';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (currentStatus) {
+                        e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
+                        e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
+                      }
+                    }}
+                  >
+                    {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
+                  </button>
+                  <FavoriteButton mediaType="series" mediaId={id} isFavorite={isFavorite} />
+                  <button 
+                    className="btn btn-outline-secondary"
+                    onClick={() => setShowListModal(true)}
+                    title="Add to Custom List"
+                  >
+                    + List
+                  </button>
+                </div>
+                {currentStatus && (
+                  <div className="bg-dark p-2 rounded" style={{ border: '1px solid var(--border-neon)' }}>
+                    <InlineRating 
+                      mediaType="series" 
+                      mediaId={id} 
+                      initialRating={libraryItem?.rating}
+                      onRatingChange={(newRating) => {
+                        // Optimistically update status if necessary
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -200,28 +230,73 @@ const SeriesDetail = () => {
       </div>
 
       <div className="container" style={{ marginTop: 'var(--spacing-2xl)', paddingBottom: 'var(--spacing-3xl)' }}>
-        {/* Seasons Section */}
-        {series.seasons && series.seasons.length > 0 && (
-          <div className="mb-5">
-            <h3 className="mb-4">Seasons</h3>
-            <div className="d-flex flex-column gap-3">
-              {series.seasons.filter(s => s.season_number > 0).map(season => (
-                <div key={season.id} className="card p-3 d-flex flex-row gap-4 align-items-center" style={{ backgroundColor: 'var(--color-bg-surface)', border: 'none', borderRadius: 'var(--radius-md)' }}>
-                  {season.poster_url ? (
-                    <img src={season.poster_url} alt={season.name} style={{ width: '80px', borderRadius: 'var(--radius-sm)' }} />
-                  ) : (
-                    <div style={{ width: '80px', height: '120px', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-sm)' }}></div>
-                  )}
-                  <div>
-                    <h4 style={{ marginBottom: '4px' }}>{season.name}</h4>
-                    <p className="text-muted mb-0">
-                      {formatDate(season.air_date)} • {season.episode_count} Episodes
-                    </p>
-                  </div>
+        
+        {/* Navigation Tabs */}
+        <ul className="nav nav-tabs mb-4" style={{ borderBottomColor: 'var(--border-neon)' }}>
+          <li className="nav-item">
+            <button 
+              className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
+              style={{
+                backgroundColor: activeTab === 'overview' ? 'var(--color-bg-surface)' : 'transparent',
+                color: activeTab === 'overview' ? 'var(--neon-cyan)' : 'var(--color-text-muted)',
+                borderColor: activeTab === 'overview' ? 'var(--border-neon) var(--border-neon) var(--color-bg-base)' : 'transparent',
+                fontWeight: 600,
+              }}
+              onClick={() => setActiveTab('overview')}
+            >
+              Overview
+            </button>
+          </li>
+          <li className="nav-item">
+            <button 
+              className={`nav-link ${activeTab === 'episodes' ? 'active' : ''}`}
+              style={{
+                backgroundColor: activeTab === 'episodes' ? 'var(--color-bg-surface)' : 'transparent',
+                color: activeTab === 'episodes' ? 'var(--neon-cyan)' : 'var(--color-text-muted)',
+                borderColor: activeTab === 'episodes' ? 'var(--border-neon) var(--border-neon) var(--color-bg-base)' : 'transparent',
+                fontWeight: 600,
+              }}
+              onClick={() => setActiveTab('episodes')}
+            >
+              Episode Guide
+            </button>
+          </li>
+        </ul>
+
+        {activeTab === 'episodes' && (
+          <EpisodeGuide 
+            seriesId={id} 
+            seasons={series.seasons} 
+            userEpisodes={userEpisodes} 
+          />
+        )}
+
+        {activeTab === 'overview' && (
+          <>
+            {/* Seasons Section */}
+            {series.seasons && series.seasons.length > 0 && (
+              <div className="mb-5">
+                <h3 className="mb-4">Seasons</h3>
+                <div className="d-flex flex-column gap-3">
+                  {series.seasons.filter(s => s.season_number > 0).map(season => (
+                    <div key={season.id} className="card p-3 d-flex flex-row gap-4 align-items-center" style={{ backgroundColor: 'var(--color-bg-surface)', border: 'none', borderRadius: 'var(--radius-md)' }}>
+                      {season.poster_url ? (
+                        <img src={season.poster_url} alt={season.name} style={{ width: '80px', borderRadius: 'var(--radius-sm)' }} />
+                      ) : (
+                        <div style={{ width: '80px', height: '120px', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-sm)' }}></div>
+                      )}
+                      <div>
+                        <h4 style={{ marginBottom: '4px' }}>{season.name}</h4>
+                        <p className="text-muted mb-0">
+                          {formatDate(season.air_date)} • {season.episode_count} Episodes
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Cast Section */}

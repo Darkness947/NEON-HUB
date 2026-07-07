@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import mediaService from '../../services/mediaService';
 import reviewService from '../../services/reviewService';
+import libraryService from '../../services/libraryService';
 import GameCard from '../../components/media/GameCard';
 import { formatDate } from '../../utils/formatDate';
 import { useLibrary } from '../../hooks/useLibrary';
@@ -10,6 +11,7 @@ import FavoriteButton from '../../components/media/FavoriteButton';
 import ReviewModal from '../../components/media/ReviewModal';
 import AddToListModal from '../../components/media/AddToListModal';
 import SkeletonDetail from '../../components/common/SkeletonDetail';
+import InlineRating from '../../components/media/InlineRating';
 import toast from 'react-hot-toast';
 
 const GameDetail = () => {
@@ -22,7 +24,7 @@ const GameDetail = () => {
   const [error, setError] = useState(null);
   const [reviewsError, setReviewsError] = useState(null);
   
-  const { getStatus, isInLibrary, addToLibrary, removeFromLibrary } = useLibrary();
+  const { getStatus, isInLibrary, addToLibrary, removeFromLibrary, updateItem } = useLibrary();
   const currentStatus = getStatus('game', id);
   const libraryItem = isInLibrary('game', id);
   const isFavorite = libraryItem ? libraryItem.favorite : false;
@@ -149,48 +151,92 @@ const GameDetail = () => {
                 <strong>RAWG<br/>Rating</strong>
               </div>
               
-              <div className="d-flex align-items-center gap-3">
-                <button 
-                  className="btn px-4 py-2"
-                  style={{
-                    backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onClick={async () => {
-                    if (currentStatus) {
-                      await removeFromLibrary('game', id);
-                    } else {
-                      await addToLibrary('game', id, 'backlog');
-                    }
-                  }}
-                  onMouseOver={(e) => {
-                    if (currentStatus) {
-                      e.currentTarget.style.backgroundColor = 'var(--color-danger)';
-                      e.currentTarget.innerText = '✕ Remove from Library';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (currentStatus) {
-                      e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
-                      e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
-                    }
-                  }}
-                >
-                  {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
-                </button>
-                <FavoriteButton mediaType="game" mediaId={id} isFavorite={isFavorite} />
-                <button 
-                  className="btn btn-outline-secondary"
-                  onClick={() => setShowListModal(true)}
-                  title="Add to Custom List"
-                >
-                  + List
-                </button>
+              <div className="d-flex flex-column align-items-start gap-3">
+                <div className="d-flex align-items-center gap-3">
+                  <button 
+                    className="btn px-4 py-2"
+                    style={{
+                      backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '20px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onClick={async () => {
+                      if (currentStatus) {
+                        await removeFromLibrary('game', id);
+                      } else {
+                        await addToLibrary('game', id, 'backlog');
+                      }
+                    }}
+                    onMouseOver={(e) => {
+                      if (currentStatus) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-danger)';
+                        e.currentTarget.innerText = '✕ Remove from Library';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (currentStatus) {
+                        e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
+                        e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
+                      }
+                    }}
+                  >
+                    {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
+                  </button>
+                  <FavoriteButton mediaType="game" mediaId={id} isFavorite={isFavorite} />
+                  <button 
+                    className="btn btn-outline-secondary"
+                    onClick={() => setShowListModal(true)}
+                    title="Add to Custom List"
+                  >
+                    + List
+                  </button>
+                </div>
+                {currentStatus && (
+                  <div className="d-flex gap-3">
+                    <div className="bg-dark p-2 rounded d-flex flex-column justify-content-center" style={{ border: '1px solid var(--border-neon)' }}>
+                      <InlineRating 
+                        mediaType="game" 
+                        mediaId={id} 
+                        initialRating={libraryItem?.rating}
+                      />
+                    </div>
+                    <div className="bg-dark p-2 rounded d-flex align-items-center gap-2" style={{ border: '1px solid var(--border-neon)' }}>
+                      <span className="text-muted" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Hours:</span>
+                      <input 
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        defaultValue={libraryItem?.hours_played || 0}
+                        style={{
+                          width: '70px',
+                          backgroundColor: 'var(--color-bg-deep)',
+                          border: '1px solid var(--border-neon)',
+                          color: 'var(--color-text-primary)',
+                          borderRadius: '4px',
+                          padding: '4px 8px'
+                        }}
+                        onBlur={async (e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val) && val >= 0 && val !== (libraryItem?.hours_played || 0)) {
+                            try {
+                              await updateItem('game', id, { hours_played: val });
+                              toast.success('Hours played updated');
+                            } catch (err) {
+                              toast.error('Failed to update hours');
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.target.blur();
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

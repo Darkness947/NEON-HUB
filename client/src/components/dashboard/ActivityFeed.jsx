@@ -2,13 +2,13 @@ import React from 'react';
 import { formatDate } from '../../utils/formatDate';
 
 const getActionDetails = (action, mediaType) => {
-  if (action === 'added_movie' || action === 'added_series' || action === 'added_game') {
+  if (action === 'added_movie' || action === 'added_series' || action === 'added_game' || action === 'tracked_episode') {
     return { icon: '➕', text: 'Added to library', color: 'var(--color-accent-purple)' };
   }
   if (action === 'removed_movie' || action === 'removed_series' || action === 'removed_game') {
     return { icon: '➖', text: 'Removed from library', color: 'var(--color-danger)' };
   }
-  if (action === 'updated_movie' || action === 'updated_series' || action === 'updated_game') {
+  if (action === 'updated_movie' || action === 'updated_series' || action === 'updated_game' || action === 'updated_episode') {
     return { icon: '🔄', text: 'Updated tracking', color: 'var(--color-accent-blue)' };
   }
   return { icon: '📝', text: 'Activity', color: 'var(--color-text-secondary)' };

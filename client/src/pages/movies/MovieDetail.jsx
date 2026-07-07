@@ -11,6 +11,7 @@ import ReviewModal from '../../components/media/ReviewModal';
 import AddToListModal from '../../components/media/AddToListModal';
 import SkeletonDetail from '../../components/common/SkeletonDetail';
 import ScrollableRow from '../../components/common/ScrollableRow';
+import InlineRating from '../../components/media/InlineRating';
 import toast from 'react-hot-toast';
 
 const MovieDetail = () => {
@@ -131,62 +132,73 @@ const MovieDetail = () => {
               <span>{movie.runtime} min</span>
             </div>
 
-            <div className="d-flex align-items-center gap-4 mb-4">
-              <div className="d-flex align-items-center gap-2">
-                <div style={{ 
-                  width: '50px', height: '50px', borderRadius: '50%', 
-                  backgroundColor: 'var(--color-bg-deep)', border: '3px solid var(--color-success)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
-                }}>
-                  {Math.round(movie.vote_average * 10)}%
+              <div className="d-flex align-items-center gap-4 mb-4">
+                <div className="d-flex align-items-center gap-2">
+                  <div style={{ 
+                    width: '50px', height: '50px', borderRadius: '50%', 
+                    backgroundColor: 'var(--color-bg-deep)', border: '3px solid var(--color-success)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+                  }}>
+                    {Math.round(movie.vote_average * 10)}%
+                  </div>
+                  <strong>User<br/>Score</strong>
                 </div>
-                <strong>User<br/>Score</strong>
+                
+                <div className="d-flex flex-column align-items-start gap-3">
+                  <div className="d-flex align-items-center gap-3">
+                    <button 
+                      className="btn px-4 py-2"
+                      style={{
+                        backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '20px',
+                        fontSize: '0.9rem',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onClick={async () => {
+                        if (currentStatus) {
+                          await removeFromLibrary('movie', id);
+                        } else {
+                          await addToLibrary('movie', id, 'planned');
+                        }
+                      }}
+                      onMouseOver={(e) => {
+                        if (currentStatus) {
+                          e.currentTarget.style.backgroundColor = 'var(--color-danger)';
+                          e.currentTarget.innerText = '✕ Remove from Library';
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (currentStatus) {
+                          e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
+                          e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
+                        }
+                      }}
+                    >
+                      {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
+                    </button>
+                    <FavoriteButton mediaType="movie" mediaId={id} isFavorite={isFavorite} />
+                    <button 
+                      className="btn btn-outline-secondary"
+                      onClick={() => setShowListModal(true)}
+                      title="Add to Custom List"
+                    >
+                      + List
+                    </button>
+                  </div>
+                  {currentStatus && (
+                    <div className="bg-dark p-2 rounded" style={{ border: '1px solid var(--border-neon)' }}>
+                      <InlineRating 
+                        mediaType="movie" 
+                        mediaId={id} 
+                        initialRating={libraryItem?.rating}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-              
-              <div className="d-flex align-items-center gap-3">
-                <button 
-                  className="btn px-4 py-2"
-                  style={{
-                    backgroundColor: currentStatus ? `var(--${getStatusColor(currentStatus)})` : 'var(--color-accent-purple)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onClick={async () => {
-                    if (currentStatus) {
-                      await removeFromLibrary('movie', id);
-                    } else {
-                      await addToLibrary('movie', id, 'planned');
-                    }
-                  }}
-                  onMouseOver={(e) => {
-                    if (currentStatus) {
-                      e.currentTarget.style.backgroundColor = 'var(--color-danger)';
-                      e.currentTarget.innerText = '✕ Remove from Library';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (currentStatus) {
-                      e.currentTarget.style.backgroundColor = `var(--${getStatusColor(currentStatus)})`;
-                      e.currentTarget.innerText = `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
-                    }
-                  }}
-                >
-                  {currentStatus ? `✓ ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}` : '+ Add to Library'}
-                </button>
-                <FavoriteButton mediaType="movie" mediaId={id} isFavorite={isFavorite} />
-                <button 
-                  className="btn btn-outline-secondary"
-                  onClick={() => setShowListModal(true)}
-                  title="Add to Custom List"
-                >
-                  + List
-                </button>
-              </div>
-            </div>
 
             <h5 className="text-muted" style={{ fontStyle: 'italic', marginBottom: 'var(--spacing-md)' }}>
               {movie.tagline}

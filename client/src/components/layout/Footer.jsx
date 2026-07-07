@@ -58,8 +58,9 @@ const Footer = () => {
           </div>
           
           <div className="col-12 col-md-2">
-            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>Legal</h5>
+            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>About</h5>
             <ul className="list-unstyled d-flex flex-column gap-2">
+              <li><Link to="/contact" className="text-muted text-decoration-none">Contact</Link></li>
               <li><a href="#" className="text-muted text-decoration-none">Privacy Policy</a></li>
               <li><a href="#" className="text-muted text-decoration-none">Terms of Service</a></li>
             </ul>
