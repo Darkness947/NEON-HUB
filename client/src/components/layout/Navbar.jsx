@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import defaultAvatar from '../../assets/images/default_avatar.png';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -82,7 +84,7 @@ const Navbar = () => {
               <input
                 type="search"
                 className="form-control"
-                placeholder="Search movies, series, games..."
+                placeholder={t('home.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search media"
@@ -112,12 +114,12 @@ const Navbar = () => {
           <ul className="navbar-nav ms-auto align-items-center gap-1">
             <li className="nav-item">
               <Link className="nav-link" to="/" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px', transition: 'color 0.3s ease' }}>
-                Home
+                {t('nav.home')}
               </Link>
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/discover" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px', transition: 'color 0.3s ease' }}>
-                Discover
+                {t('nav.discover')}
               </Link>
             </li>
 
@@ -125,12 +127,12 @@ const Navbar = () => {
               <>
                 <li className="nav-item">
                   <Link className="nav-link" to="/dashboard" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px' }}>
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/library" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px' }}>
-                    Library
+                    {t('nav.library')}
                   </Link>
                 </li>
 
@@ -174,7 +176,8 @@ const Navbar = () => {
                       className="dropdown-menu show"
                       style={{
                         position: 'absolute',
-                        right: 0,
+                        right: document.documentElement.dir === 'rtl' ? 'auto' : 0,
+                        left: document.documentElement.dir === 'rtl' ? 0 : 'auto',
                         top: '100%',
                         marginTop: '8px',
                         minWidth: '180px',
@@ -185,22 +188,22 @@ const Navbar = () => {
                       }}
                     >
                       <Link className="dropdown-item py-2" to="/profile" onClick={() => setShowDropdown(false)}>
-                        👤 Profile
+                        👤 {t('nav.profile')}
                       </Link>
                       <Link className="dropdown-item py-2" to="/favorites" onClick={() => setShowDropdown(false)}>
-                        ❤️ Favorites
+                        ❤️ {t('favorites.title')}
                       </Link>
                       <Link className="dropdown-item py-2" to="/ratings" onClick={() => setShowDropdown(false)}>
-                        ⭐ My Ratings
+                        ⭐ {t('media.rating')}
                       </Link>
                       <Link className="dropdown-item py-2" to="/reviews" onClick={() => setShowDropdown(false)}>
-                        ✍️ My Reviews
+                        ✍️ {t('reviews.title')}
                       </Link>
                       <Link className="dropdown-item py-2" to="/lists" onClick={() => setShowDropdown(false)}>
-                        📋 Custom Lists
+                        📋 {t('lists.title')}
                       </Link>
                       <Link className="dropdown-item py-2" to="/settings" onClick={() => setShowDropdown(false)}>
-                        ⚙️ Settings
+                        ⚙️ {t('nav.settings')}
                       </Link>
                       <hr className="dropdown-divider" style={{ borderColor: 'var(--border-neon)' }} />
                       <button
@@ -208,7 +211,7 @@ const Navbar = () => {
                         onClick={handleLogout}
                         style={{ color: 'var(--color-danger)' }}
                       >
-                        🚪 Logout
+                        🚪 {t('nav.logout')}
                       </button>
                     </div>
                   )}
@@ -218,12 +221,12 @@ const Navbar = () => {
               <>
                 <li className="nav-item ms-2">
                   <Link className="btn btn-outline-primary btn-sm" to="/login">
-                    Log In
+                    {t('nav.login')}
                   </Link>
                 </li>
                 <li className="nav-item ms-1">
                   <Link className="btn btn-primary btn-sm" to="/register">
-                    Sign Up
+                    {t('nav.register')}
                   </Link>
                 </li>
               </>

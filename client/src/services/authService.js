@@ -56,7 +56,20 @@ const authService = {
   },
 
   resetPassword: async (token, newPassword) => {
-    const { data } = await api.post('/api/auth/reset-password', { token, newPassword });
+    const { data } = await api.post('/api/auth/reset-password', {
+      token,
+      newPassword,
+    });
+    return data.data;
+  },
+
+  updateBio: async (bio) => {
+    const { data } = await api.put('/api/auth/bio', { bio });
+    return data.data;
+  },
+
+  deleteAccount: async () => {
+    const { data } = await api.delete('/api/auth/account');
     return data.data;
   },
 };

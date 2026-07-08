@@ -5,9 +5,11 @@ import StatsCard from '../../components/dashboard/StatsCard';
 import ProgressBar from '../../components/dashboard/ProgressBar';
 import ActivityFeed from '../../components/dashboard/ActivityFeed';
 import GenreChart from '../../components/dashboard/GenreChart';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   const [stats, setStats] = useState(null);
   const [activity, setActivity] = useState([]);
@@ -72,31 +74,31 @@ const Dashboard = () => {
   return (
     <div className="page-container fade-in">
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', marginBottom: 'var(--spacing-lg)' }}>
-        Welcome back, <span className="text-accent-purple">{user?.username}</span>
+        {t('dashboard.welcome')}, <span className="text-accent-purple">{user?.username}</span>
       </h1>
 
       {/* Top Row: Stats Cards */}
       <div className="row g-4 mb-4">
         <StatsCard 
-          label="Total Tracked" 
+          label={t('dashboard.totalTracked')} 
           count={totalTracked} 
           icon="🎬" 
           color="var(--color-accent-purple)" 
         />
         <StatsCard 
-          label="Avg Rating" 
+          label={t('dashboard.avgRating')} 
           count={stats.avgRating > 0 ? stats.avgRating.toFixed(1) : '-'} 
           icon="⭐" 
           color="var(--color-accent-amber)" 
         />
         <StatsCard 
-          label="Hours Played" 
+          label={t('dashboard.hoursPlayed')} 
           count={stats.totalHoursPlayed > 0 ? Math.round(stats.totalHoursPlayed) : 0} 
           icon="🎮" 
           color="var(--color-accent-blue)" 
         />
         <StatsCard 
-          label="Completion %" 
+          label={t('dashboard.completionPct')} 
           count={totalTracked > 0 ? Math.round(((stats.moviesCompleted + stats.seriesCompleted + stats.gamesCompleted) / totalTracked) * 100) + '%' : '0%'} 
           icon="✅" 
           color="var(--color-success)" 
@@ -109,12 +111,12 @@ const Dashboard = () => {
         <div className="col-12 col-lg-5">
           <div className="card p-4 h-100">
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
-              Completion Progress
+              {t('dashboard.completionProgress')}
             </h3>
             <div className="d-flex justify-content-around align-items-center h-100 flex-wrap">
-              <ProgressBar percentage={moviesPercent} color="var(--color-accent-purple)" label="Movies" />
-              <ProgressBar percentage={seriesPercent} color="var(--color-accent-blue)" label="Series" />
-              <ProgressBar percentage={gamesPercent} color="var(--color-accent-amber)" label="Games" />
+              <ProgressBar percentage={moviesPercent} color="var(--color-accent-purple)" label={t('nav.movies')} />
+              <ProgressBar percentage={seriesPercent} color="var(--color-accent-blue)" label={t('nav.series')} />
+              <ProgressBar percentage={gamesPercent} color="var(--color-accent-amber)" label={t('nav.games')} />
             </div>
           </div>
         </div>
@@ -123,7 +125,7 @@ const Dashboard = () => {
         <div className="col-12 col-lg-7">
           <div className="card p-4 h-100">
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
-              Top Genres (Recent)
+              {t('dashboard.topGenres')}
             </h3>
             <GenreChart data={genres} />
           </div>
@@ -133,7 +135,7 @@ const Dashboard = () => {
       {/* Bottom Row: Activity Feed */}
       <div className="card p-4 mt-4">
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
-          Recent Activity
+          {t('dashboard.recentActivity')}
         </h3>
         <ActivityFeed activities={activity} />
       </div>

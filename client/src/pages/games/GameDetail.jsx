@@ -11,6 +11,7 @@ import FavoriteButton from '../../components/media/FavoriteButton';
 import ReviewModal from '../../components/media/ReviewModal';
 import AddToListModal from '../../components/media/AddToListModal';
 import SkeletonDetail from '../../components/common/SkeletonDetail';
+import ScrollableRow from '../../components/common/ScrollableRow';
 import InlineRating from '../../components/media/InlineRating';
 import toast from 'react-hot-toast';
 
@@ -257,13 +258,13 @@ const GameDetail = () => {
         {game.screenshots && game.screenshots.length > 0 && (
           <div className="mb-5">
             <h3 className="mb-4">Screenshots</h3>
-            <div className="d-flex gap-3" style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}>
+            <ScrollableRow>
               {game.screenshots.map((screenUrl, i) => (
                 <div key={i} style={{ minWidth: '400px', height: '225px', borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0 }}>
                   <img src={screenUrl} alt={`Screenshot ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               ))}
-            </div>
+            </ScrollableRow>
           </div>
         )}
 
@@ -308,11 +309,11 @@ const GameDetail = () => {
         {game.similar && game.similar.length > 0 && (
           <div>
             <h3 className="mb-4">Similar Games</h3>
-            <div className="d-flex gap-3" style={{ overflowX: 'auto', paddingBottom: 'var(--spacing-md)', scrollbarWidth: 'none' }}>
+            <ScrollableRow>
               {game.similar.map(sim => (
                 <GameCard key={sim.rawg_id} {...sim} />
               ))}
-            </div>
+            </ScrollableRow>
           </div>
         )}
       </div>

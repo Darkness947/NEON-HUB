@@ -27,6 +27,8 @@ import Profile from '../pages/profile/Profile';
 import Settings from '../pages/profile/Settings';
 import MyRatings from '../pages/profile/MyRatings';
 import Contact from '../pages/Contact';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import TermsOfService from '../pages/TermsOfService';
 
 // ─── Protected Route Wrapper ──────────────────────────────────────────────────
 const ProtectedRoute = () => {
@@ -66,6 +68,8 @@ const AppRouter = () => {
           <Route path="/movies/:id" element={<MovieDetail />} />
           <Route path="/series/:id" element={<SeriesDetail />} />
           <Route path="/games/:id" element={<GameDetail />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
 
           {/* Guest-only routes (redirect authenticated users) */}
           <Route element={<GuestRoute />}>

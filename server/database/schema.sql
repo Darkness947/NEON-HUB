@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   email            VARCHAR(255) UNIQUE NOT NULL,
   password         TEXT NOT NULL,
   avatar_url       TEXT DEFAULT '/images/default-avatar.png',
+  bio              TEXT,
   email_verified   BOOLEAN DEFAULT FALSE,
   reset_token      TEXT,
   reset_token_expires TIMESTAMPTZ,

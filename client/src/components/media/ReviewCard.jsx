@@ -63,11 +63,13 @@ const ReviewCard = ({ review, onDelete }) => {
             )}
           </div>
 
-          <div className="mt-3">
-            <p className="text-light" style={{ whiteSpace: 'pre-line', lineHeight: '1.6' }}>
-              {review.review}
-            </p>
-          </div>
+          {review.review && (
+            <div className="mt-3">
+              <p className="text-light" style={{ whiteSpace: 'pre-line', lineHeight: '1.6', margin: 0 }}>
+                {review.review}
+              </p>
+            </div>
+          )}
           
           <div className="d-flex justify-content-end mt-3">
             <Link to={getMediaLink()} state={{ openReviewModal: true }} className="btn btn-sm btn-outline-secondary me-2">

@@ -5,8 +5,10 @@ import EmptyState from '../../components/common/EmptyState';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import toast from 'react-hot-toast';
 import { formatDate } from '../../utils/formatDate';
+import { useTranslation } from 'react-i18next';
 
 const CustomLists = () => {
+  const { t } = useTranslation();
   const [lists, setLists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -75,7 +77,7 @@ const CustomLists = () => {
   if (isLoading) {
     return (
       <div className="page-container fade-in">
-        <h1 className="mb-4 section-title">My <span className="text-accent-purple">Lists</span></h1>
+        <h1 className="mb-4 section-title">{t('lists.title')}</h1>
         <div className="row g-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <div className="col-12 col-md-6 col-lg-4" key={i}>
@@ -96,10 +98,10 @@ const CustomLists = () => {
     <div className="page-container fade-in">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem' }}>
-          My <span className="text-accent-purple">Lists</span>
+          {t('lists.title')}
         </h1>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          + Create List
+          + {t('lists.createNew')}
         </button>
       </div>
 
@@ -112,9 +114,9 @@ const CustomLists = () => {
       {lists.length === 0 && !error ? (
         <EmptyState
           icon="📋"
-          title="No lists yet"
+          title={t('lists.noLists')}
           message="You haven't created any custom lists. Curate your favorite movies, series, and games!"
-          actionText="Create Your First List"
+          actionText={t('lists.createNew')}
           onAction={() => setShowModal(true)}
         />
       ) : (
@@ -179,13 +181,13 @@ const CustomLists = () => {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content" style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid #2c2c3e' }}>
                 <div className="modal-header border-bottom-0">
-                  <h5 className="modal-title" style={{ fontFamily: 'var(--font-display)' }}>Create New List</h5>
+                  <h5 className="modal-title" style={{ fontFamily: 'var(--font-display)' }}>{t('lists.createNew')}</h5>
                   <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
                 </div>
                 <form onSubmit={handleCreateList}>
                   <div className="modal-body">
                     <div className="mb-3">
-                      <label className="form-label text-muted">List Name</label>
+                      <label className="form-label text-muted">{t('lists.listName')}</label>
                       <input 
                         type="text" 
                         className="form-control bg-dark text-light border-0" 
@@ -197,7 +199,7 @@ const CustomLists = () => {
                       />
                     </div>
                     <div className="mb-3">
-                      <label className="form-label text-muted">Description (Optional)</label>
+                      <label className="form-label text-muted">{t('lists.description')} (Optional)</label>
                       <textarea 
                         className="form-control bg-dark text-light border-0" 
                         rows="3"
@@ -208,9 +210,9 @@ const CustomLists = () => {
                     </div>
                   </div>
                   <div className="modal-footer border-top-0">
-                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>{t('settings.cancel')}</button>
                     <button type="submit" className="btn btn-primary" disabled={!listName.trim() || isSubmitting}>
-                      {isSubmitting ? 'Creating...' : 'Create List'}
+                      {isSubmitting ? 'Creating...' : t('lists.create')}
                     </button>
                   </div>
                 </form>
@@ -224,9 +226,9 @@ const CustomLists = () => {
         isOpen={deleteData.isOpen}
         onClose={() => setDeleteData({ isOpen: false, listId: null })}
         onConfirm={confirmDelete}
-        title="Delete List"
+        title={t('lists.delete')}
         message="Are you sure you want to delete this list? This will not remove the items from your library, only from this list."
-        confirmText="Delete List"
+        confirmText={t('lists.delete')}
         confirmStyle="danger"
       />
     </div>

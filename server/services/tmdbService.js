@@ -28,7 +28,7 @@ const cleanMovie = (m) => ({
   release_date: m.release_date,
   vote_average: m.vote_average,
   overview: m.overview,
-  genre_ids: m.genre_ids,
+  genre_ids: m.genre_ids || (m.genres ? m.genres.map(g => g.id) : []),
   media_type: 'movie',
 });
 
@@ -42,7 +42,7 @@ const cleanSeries = (s) => ({
   release_date: s.first_air_date,
   vote_average: s.vote_average,
   overview: s.overview,
-  genre_ids: s.genre_ids,
+  genre_ids: s.genre_ids || (s.genres ? s.genres.map(g => g.id) : []),
   media_type: 'series',
 });
 

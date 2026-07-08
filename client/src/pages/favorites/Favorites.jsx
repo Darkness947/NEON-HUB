@@ -4,8 +4,10 @@ import MediaCard from '../../components/media/MediaCard';
 import GameCard from '../../components/media/GameCard';
 import SkeletonCard from '../../components/media/SkeletonCard';
 import EmptyState from '../../components/common/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 const Favorites = () => {
+  const { t } = useTranslation();
   const { movies, series, games, isLoading } = useLibrary();
   const [activeTab, setActiveTab] = useState('all');
 
@@ -28,15 +30,15 @@ const Favorites = () => {
   const totalCount = favorites.movies.length + favorites.series.length + favorites.games.length;
 
   const tabs = [
-    { key: 'all', label: 'All', count: totalCount },
-    { key: 'movies', label: 'Movies', count: favorites.movies.length },
-    { key: 'series', label: 'Series', count: favorites.series.length },
-    { key: 'games', label: 'Games', count: favorites.games.length },
+    { key: 'all', label: t('library.all'), count: totalCount },
+    { key: 'movies', label: t('nav.movies'), count: favorites.movies.length },
+    { key: 'series', label: t('nav.series'), count: favorites.series.length },
+    { key: 'games', label: t('nav.games'), count: favorites.games.length },
   ];
 
   return (
     <div className="page-container fade-in">
-      <h1 className="mb-4 section-title">Favorites</h1>
+      <h1 className="mb-4 section-title">{t('favorites.title')}</h1>
       
       <ul className="nav nav-tabs mb-4 border-0" style={{ gap: '10px' }}>
         {tabs.map(tab => (
@@ -69,9 +71,9 @@ const Favorites = () => {
       ) : items.length === 0 ? (
         <EmptyState
           icon="♥"
-          title={`No ${activeTab === 'all' ? 'favorites' : activeTab} yet`}
+          title={t('favorites.noFavorites')}
           message="Click the heart icon on any media card to add it to your favorites."
-          actionText="Discover Media"
+          actionText={t('library.discoverMedia')}
           actionLink="/discover"
         />
       ) : (

@@ -1,6 +1,8 @@
 import mainLogo from '../assets/images/main_logo.png';
+import { useTranslation } from 'react-i18next';
 
 const Contact = () => {
+  const { t } = useTranslation();
   const contactLinks = [
     {
       platform: 'Email',
@@ -41,9 +43,9 @@ const Contact = () => {
           className="logo-animate"
           style={{ maxWidth: '450px', width: '100%', height: 'auto', marginBottom: '2rem' }} 
         />
-        <h1 className="fw-bold mb-3">Get in Touch</h1>
+        <h1 className="fw-bold mb-3">{t('contact.title')}</h1>
         <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto' }}>
-          Have questions, suggestions, or just want to say hi? Feel free to reach out through any of the platforms below!
+          {t('contact.desc')}
         </p>
       </div>
 

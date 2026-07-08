@@ -5,8 +5,10 @@ import SkeletonCard from '../../components/media/SkeletonCard';
 import EmptyState from '../../components/common/EmptyState';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const MyReviews = () => {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,7 +50,7 @@ const MyReviews = () => {
   return (
     <div className="page-container fade-in">
       <h1 className="mb-4 section-title">
-        My <span className="text-accent-purple">Reviews</span>
+        {t('reviews.title')}
       </h1>
 
       {error && (
@@ -72,9 +74,9 @@ const MyReviews = () => {
       ) : reviews.length === 0 && !error ? (
         <EmptyState
           icon="✍️"
-          title="No reviews yet"
+          title={t('reviews.noReviews')}
           message="You haven't reviewed any media yet. Head over to your library or discover page to start reviewing!"
-          actionText="Discover Media"
+          actionText={t('library.discoverMedia')}
           actionLink="/discover"
         />
       ) : (
@@ -93,9 +95,9 @@ const MyReviews = () => {
         isOpen={deleteData.isOpen}
         onClose={() => setDeleteData({ isOpen: false, mediaType: null, mediaId: null })}
         onConfirm={confirmDelete}
-        title="Delete Review"
+        title={t('reviews.delete')}
         message="Are you sure you want to delete this review? This cannot be undone."
-        confirmText="Delete"
+        confirmText={t('reviews.delete')}
         confirmStyle="danger"
       />
     </div>

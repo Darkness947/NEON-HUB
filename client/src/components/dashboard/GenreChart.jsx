@@ -9,12 +9,14 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 const GenreChart = ({ data }) => {
+  const { t } = useTranslation();
   if (!data || data.length === 0) {
     return (
       <div className="text-muted text-center py-4">
-        Not enough data to analyze genres.
+        {t('dashboard.noGenreData')}
       </div>
     );
   }

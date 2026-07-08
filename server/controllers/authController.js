@@ -44,6 +44,7 @@ const _formatUser = (user) => ({
   username: user.username,
   email: user.email,
   avatar_url: user.avatar_url,
+  bio: user.bio,
   created_at: user.created_at,
 });
 
@@ -336,6 +337,40 @@ const uploadAvatar = asyncHandler(async (req, res) => {
   });
 });
 
+// ─── Update Bio ───────────────────────────────────────────────────────────────
+
+const updateBio = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const first = errors.array()[0];
+    throw new AppError(first.msg, 400, 'VALIDATION_ERROR');
+  }
+
+  const { bio } = req.body;
+  const updatedUser = await userModel.updateBio(req.user.id, bio);
+
+  res.status(200).json({
+    success: true,
+    data: { user: _formatUser(updatedUser) },
+  });
+});
+
+// ─── Delete Account ───────────────────────────────────────────────────────────
+
+const deleteAccount = asyncHandler(async (req, res) => {
+  await userModel.deleteUser(req.user.id);
+
+  res.cookie('refreshToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    expires: new Date(0),
+    path: '/',
+  });
+
+  res.status(200).json({ success: true, data: { message: 'Account deleted successfully' } });
+});
+
 module.exports = {
   register,
   login,
@@ -346,4 +381,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   uploadAvatar,
+  updateBio,
+  deleteAccount,
 };

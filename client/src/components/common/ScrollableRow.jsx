@@ -8,8 +8,15 @@ const ScrollableRow = ({ children }) => {
   const checkScroll = () => {
     if (rowRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = rowRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
+      const isRtl = window.getComputedStyle(rowRef.current).direction === 'rtl';
+      
+      if (isRtl) {
+        setCanScrollLeft(Math.abs(Math.floor(scrollLeft)) + clientWidth < scrollWidth);
+        setCanScrollRight(Math.ceil(scrollLeft) < 0);
+      } else {
+        setCanScrollLeft(Math.floor(scrollLeft) > 0);
+        setCanScrollRight(Math.ceil(scrollLeft) + clientWidth < scrollWidth);
+      }
     }
   };
 

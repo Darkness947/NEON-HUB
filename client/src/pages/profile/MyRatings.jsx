@@ -4,9 +4,11 @@ import libraryService from '../../services/libraryService';
 import ReviewCard from '../../components/media/ReviewCard';
 import FullPageLoader from '../../components/common/Loader';
 import EmptyState from '../../components/common/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 const MyRatings = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [ratings, setRatings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,7 +41,7 @@ const MyRatings = () => {
 
   return (
     <div className="page-container fade-in">
-      <h1 className="mb-4" style={{ fontFamily: 'var(--font-display)', fontSize: '2rem' }}>My Ratings</h1>
+      <h1 className="mb-4" style={{ fontFamily: 'var(--font-display)', fontSize: '2rem' }}>{t('ratings.title')}</h1>
 
       {error && (
         <div className="alert alert-danger" role="alert">
@@ -49,8 +51,8 @@ const MyRatings = () => {
 
       {!error && ratings.length === 0 ? (
         <EmptyState 
-          title="No Ratings Yet" 
-          message="You haven't rated any movies, series, or games yet. Start exploring and share your opinions!" 
+          title={t('ratings.noRatings')} 
+          message={t('ratings.emptyMessage')} 
         />
       ) : (
         <div className="row g-4">

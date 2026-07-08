@@ -6,9 +6,11 @@ import GameCard from '../components/media/GameCard';
 import SkeletonCard from '../components/media/SkeletonCard';
 import { truncateText } from '../utils/truncateText';
 import { useLibrary } from '../hooks/useLibrary';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
   const { isInLibrary, addToLibrary, removeFromLibrary } = useLibrary();
+  const { t } = useTranslation();
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [popularSeries, setPopularSeries] = useState([]);
   const [trendingGames, setTrendingGames] = useState([]);
@@ -139,7 +141,7 @@ const Home = () => {
 
           <div style={{ maxWidth: '600px', marginLeft: '60px', marginRight: '60px', zIndex: 5 }}>
             <span className="badge mb-3 px-3 py-2" style={{ backgroundColor: 'var(--color-accent-purple)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '12px' }}>
-              Featured {itemType === 'game' ? 'Game' : itemType === 'movie' ? 'Movie' : 'TV Series'}
+              {t('home.featured')} {itemType === 'game' ? t('nav.games') : itemType === 'movie' ? t('nav.movies') : t('nav.series')}
             </span>
             <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', marginBottom: 'var(--spacing-md)', fontFamily: 'var(--font-display)', fontWeight: 700 }}>
               {currentItem.title}
@@ -149,7 +151,7 @@ const Home = () => {
             </p>
             <div className="d-flex gap-3">
               <Link to={linkTo} className="btn btn-primary px-4 py-2" style={{ borderRadius: '20px', fontWeight: '600' }}>
-                View Details
+                {t('home.viewDetails')}
               </Link>
               <button 
                 className="btn btn-outline-primary px-4 py-2" 
@@ -172,18 +174,18 @@ const Home = () => {
                   if (inLibrary) {
                     e.currentTarget.style.backgroundColor = 'var(--color-danger)';
                     e.currentTarget.style.borderColor = 'var(--color-danger)';
-                    e.currentTarget.innerText = '✕ Remove from Library';
+                    e.currentTarget.innerText = t('home.removeFromLibrary');
                   }
                 }}
                 onMouseOut={(e) => {
                   if (inLibrary) {
                     e.currentTarget.style.backgroundColor = 'var(--color-success)';
                     e.currentTarget.style.borderColor = 'var(--color-success)';
-                    e.currentTarget.innerText = '✓ In Library';
+                    e.currentTarget.innerText = t('home.inLibrary');
                   }
                 }}
               >
-                {inLibrary ? '✓ In Library' : '+ Add to Library'}
+                {inLibrary ? t('home.inLibrary') : t('home.addToLibrary')}
               </button>
             </div>
           </div>
@@ -203,8 +205,8 @@ const Home = () => {
       {/* Trending Movies Row */}
       <div className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0 section-title">Trending Movies</h3>
-          <Link to="/discover?tab=movies" className="text-accent-blue">See All →</Link>
+          <h3 className="mb-0 section-title">{t('home.trendingMovies')}</h3>
+          <Link to="/discover?tab=movies" className="text-accent-blue">{t('home.seeAll')}</Link>
         </div>
         <div 
           className="d-flex gap-3"
@@ -222,8 +224,8 @@ const Home = () => {
       {/* Popular TV Series Row */}
       <div className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0 section-title">Trending TV Series</h3>
-          <Link to="/discover?tab=series" className="text-accent-blue">See All →</Link>
+          <h3 className="mb-0 section-title">{t('home.trendingSeries')}</h3>
+          <Link to="/discover?tab=series" className="text-accent-blue">{t('home.seeAll')}</Link>
         </div>
         <div 
           className="d-flex gap-3"
@@ -241,8 +243,8 @@ const Home = () => {
       {/* Trending Games Row */}
       <div className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0 section-title">Trending Games</h3>
-          <Link to="/discover?tab=games" className="text-accent-blue">See All →</Link>
+          <h3 className="mb-0 section-title">{t('home.trendingGames')}</h3>
+          <Link to="/discover?tab=games" className="text-accent-blue">{t('home.seeAll')}</Link>
         </div>
         <div 
           className="d-flex gap-3"

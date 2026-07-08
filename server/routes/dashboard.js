@@ -8,5 +8,6 @@ router.use(authMiddleware);
 router.get('/stats', dashboardController.getStats);
 router.get('/activity', dashboardController.getActivity);
 router.get('/genres', dashboardController.getGenres);
+router.get('/insights', dashboardController.getInsights);
 
 module.exports = router;

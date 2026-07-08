@@ -120,8 +120,30 @@ const getTmdbGenreName = (id) => {
   return map[id] || `Genre ${id}`;
 }
 
+const getInsights = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  
+  const distribution = await dashboardModel.getRatingDistribution(userId);
+  
+  // Format to ensure all ratings from 1 to 10 are present
+  const fullDistribution = Array.from({ length: 10 }, (_, i) => {
+    const ratingStr = (i + 1).toString();
+    const found = distribution.find(d => parseFloat(d.rating) === (i + 1));
+    return {
+      rating: ratingStr,
+      count: found ? parseInt(found.count) : 0
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    data: fullDistribution
+  });
+});
+
 module.exports = {
   getStats,
   getActivity,
-  getGenres
+  getGenres,
+  getInsights
 };

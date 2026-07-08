@@ -21,6 +21,7 @@ const cleanGame = (g) => ({
   release_date: g.released,
   vote_average: g.rating,
   platforms: g.platforms?.map((p) => p.platform.name) || [],
+  genres: g.genres?.map((genre) => genre.name) || [],
   media_type: 'game',
 });
 

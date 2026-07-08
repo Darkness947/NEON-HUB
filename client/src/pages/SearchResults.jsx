@@ -5,8 +5,10 @@ import MediaCard from '../components/media/MediaCard';
 import GameCard from '../components/media/GameCard';
 import SkeletonCard from '../components/media/SkeletonCard';
 import EmptyState from '../components/common/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 const SearchResults = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q');
   const initialTab = searchParams.get('tab') || 'movies';
@@ -62,7 +64,7 @@ const SearchResults = () => {
   return (
     <div className="page-container fade-in">
       <h2 className="mb-4" style={{ fontFamily: 'var(--font-display)' }}>
-        Search results for "{query}"
+        {t('discover.resultsFor')} "{query}"
       </h2>
 
       {/* Tabs */}
@@ -77,7 +79,7 @@ const SearchResults = () => {
             }}
             onClick={() => setActiveTab('movies')}
           >
-            Movies
+            {t('nav.movies')}
           </button>
         </li>
         <li className="nav-item">
@@ -90,7 +92,7 @@ const SearchResults = () => {
             }}
             onClick={() => setActiveTab('series')}
           >
-            TV Series
+            {t('nav.series')}
           </button>
         </li>
         <li className="nav-item">
@@ -103,7 +105,7 @@ const SearchResults = () => {
             }}
             onClick={() => setActiveTab('games')}
           >
-            Games
+            {t('nav.games')}
           </button>
         </li>
       </ul>
@@ -122,9 +124,9 @@ const SearchResults = () => {
           <div style={{ gridColumn: '1 / -1' }}>
             <EmptyState
               icon="🔍"
-              title="No results found"
-              message={`We couldn't find any ${activeTab} matching "${query}". Try a different search term.`}
-              actionText="Browse Discover"
+              title={t('discover.noResults')}
+              message={t('discover.tryDifferent')}
+              actionText={t('library.discoverMedia')}
               actionLink="/discover"
             />
           </div>

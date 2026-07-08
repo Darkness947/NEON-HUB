@@ -4,9 +4,11 @@ import MediaCard from '../../components/media/MediaCard';
 import GameCard from '../../components/media/GameCard';
 import SkeletonCard from '../../components/media/SkeletonCard';
 import EmptyState from '../../components/common/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 const Library = () => {
   const { movies, series, games, isLoading } = useLibrary();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('movies');
 
   const getActiveItems = () => {
@@ -18,14 +20,14 @@ const Library = () => {
   const items = getActiveItems();
 
   const tabs = [
-    { key: 'movies', label: 'Movies', count: movies.length },
-    { key: 'series', label: 'Series', count: series.length },
-    { key: 'games', label: 'Games', count: games.length },
+    { key: 'movies', label: t('nav.movies'), count: movies.length },
+    { key: 'series', label: t('nav.series'), count: series.length },
+    { key: 'games', label: t('nav.games'), count: games.length },
   ];
 
   return (
     <div className="page-container fade-in">
-      <h1 className="mb-4 section-title">My Library</h1>
+      <h1 className="mb-4 section-title">{t('library.title')}</h1>
       
       <ul className="nav nav-tabs mb-4 border-0" style={{ gap: '10px' }}>
         {tabs.map(tab => (
@@ -58,9 +60,9 @@ const Library = () => {
       ) : items.length === 0 ? (
         <EmptyState
           icon="📚"
-          title={`No ${activeTab} in your library yet`}
-          message={`Explore and add some ${activeTab} to keep track of what you're watching and playing.`}
-          actionText="Discover Media"
+          title={t('library.emptyTitle', { type: t(`nav.${activeTab}`) })}
+          message={t('library.emptyMessage', { type: t(`nav.${activeTab}`) })}
+          actionText={t('home.startExploring')}
           actionLink={`/discover?tab=${activeTab}`}
         />
       ) : (

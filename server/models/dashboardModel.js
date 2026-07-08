@@ -44,7 +44,26 @@ const getRecentTrackedItems = async (userId, limit = 50) => {
   return result.rows;
 }
 
+const getRatingDistribution = async (userId) => {
+  const result = await pool.query(
+    `SELECT rating, COUNT(*) as count FROM (
+      SELECT rating FROM tracked_movies WHERE user_id = $1 AND rating IS NOT NULL
+      UNION ALL
+      SELECT rating FROM tracked_series WHERE user_id = $1 AND rating IS NOT NULL
+      UNION ALL
+      SELECT rating FROM tracked_games WHERE user_id = $1 AND rating IS NOT NULL
+      UNION ALL
+      SELECT rating FROM tracked_episodes WHERE user_id = $1 AND rating IS NOT NULL
+    ) AS all_ratings
+    GROUP BY rating
+    ORDER BY rating ASC`,
+    [userId]
+  );
+  return result.rows;
+};
+
 module.exports = {
   getStats,
-  getRecentTrackedItems
+  getRecentTrackedItems,
+  getRatingDistribution
 };

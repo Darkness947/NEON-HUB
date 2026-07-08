@@ -6,10 +6,12 @@ import MediaCard from '../../components/media/MediaCard';
 import GameCard from '../../components/media/GameCard';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const ListDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [list, setList] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,7 +83,7 @@ const ListDetail = () => {
     return (
       <div className="page-container fade-in">
         <div className="alert alert-danger mb-4">{error}</div>
-        <Link to="/lists" className="btn btn-outline-secondary">← Back to Lists</Link>
+        <Link to="/lists" className="btn btn-outline-secondary">{t('lists.backToLists')}</Link>
       </div>
     );
   }
@@ -91,12 +93,12 @@ const ListDetail = () => {
   return (
     <div className="page-container fade-in">
       <div className="mb-4">
-        <Link to="/lists" className="text-muted text-decoration-none mb-3 d-inline-block">← Back to Lists</Link>
+        <Link to="/lists" className="text-muted text-decoration-none mb-3 d-inline-block">{t('lists.backToLists')}</Link>
         
         {isEditing ? (
           <div className="card p-4 bg-surface mt-2 border-0">
             <div className="mb-3">
-              <label className="form-label text-muted">List Name</label>
+              <label className="form-label text-muted">{t('lists.listName')}</label>
               <input 
                 type="text" 
                 className="form-control bg-dark text-light border-0" 
@@ -105,7 +107,7 @@ const ListDetail = () => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label text-muted">Description</label>
+              <label className="form-label text-muted">{t('lists.description')}</label>
               <textarea 
                 className="form-control bg-dark text-light border-0" 
                 rows="3"
@@ -115,14 +117,14 @@ const ListDetail = () => {
             </div>
             <div className="d-flex gap-2">
               <button className="btn btn-primary" onClick={handleSave} disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? 'Saving...' : t('lists.saveChanges')}
               </button>
               <button className="btn btn-secondary" onClick={() => {
                 setIsEditing(false);
                 setEditName(list.name);
                 setEditDesc(list.description || '');
               }}>
-                Cancel
+                {t('settings.cancel')}
               </button>
             </div>
           </div>
@@ -137,7 +139,7 @@ const ListDetail = () => {
               </p>
             </div>
             <button className="btn btn-outline-secondary" onClick={() => setIsEditing(true)}>
-              Edit Info
+              {t('lists.editInfo')}
             </button>
           </div>
         )}
@@ -147,10 +149,10 @@ const ListDetail = () => {
 
       {list.items.length === 0 ? (
         <div className="card p-5 text-center bg-surface border-0">
-          <h3 className="mb-3">This list is empty</h3>
-          <p className="text-muted mb-4">Go to any movie, series, or game page to add it to this list.</p>
+          <h3 className="mb-3">{t('lists.emptyListTitle')}</h3>
+          <p className="text-muted mb-4">{t('lists.emptyListMessage')}</p>
           <div>
-            <Link to="/discover" className="btn btn-primary">Discover Media</Link>
+            <Link to="/discover" className="btn btn-primary">{t('library.discoverMedia')}</Link>
           </div>
         </div>
       ) : (
@@ -180,9 +182,9 @@ const ListDetail = () => {
         isOpen={deleteData.isOpen}
         onClose={() => setDeleteData({ isOpen: false, mediaType: null, mediaId: null })}
         onConfirm={confirmRemove}
-        title="Remove Item"
-        message="Are you sure you want to remove this item from the list?"
-        confirmText="Remove"
+        title={t('lists.removeItem')}
+        message={t('lists.removeItemConfirm')}
+        confirmText={t('lists.removeItem')}
         confirmStyle="danger"
       />
     </div>

@@ -5,8 +5,10 @@ import MediaCard from '../components/media/MediaCard';
 import GameCard from '../components/media/GameCard';
 import SkeletonCard from '../components/media/SkeletonCard';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
+import { useTranslation } from 'react-i18next';
 
 const Discover = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'movies';
   
@@ -80,7 +82,7 @@ const Discover = () => {
 
   return (
     <div className="page-container fade-in">
-      <h1 className="mb-4" style={{ fontFamily: 'var(--font-display)' }}>Discover</h1>
+      <h1 className="mb-4" style={{ fontFamily: 'var(--font-display)' }}>{t('discover.title')}</h1>
 
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4" style={{ borderBottomColor: 'var(--color-bg-elevated)' }}>
@@ -94,7 +96,7 @@ const Discover = () => {
             }}
             onClick={() => setActiveTab('movies')}
           >
-            Movies
+            {t('nav.movies')}
           </button>
         </li>
         <li className="nav-item">
@@ -107,7 +109,7 @@ const Discover = () => {
             }}
             onClick={() => setActiveTab('series')}
           >
-            TV Series
+            {t('nav.series')}
           </button>
         </li>
         <li className="nav-item">
@@ -120,7 +122,7 @@ const Discover = () => {
             }}
             onClick={() => setActiveTab('games')}
           >
-            Games
+            {t('nav.games')}
           </button>
         </li>
       </ul>

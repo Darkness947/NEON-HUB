@@ -15,6 +15,11 @@ const dashboardService = {
     const response = await api.get('/api/dashboard/genres');
     return response.data.data;
   },
+
+  getInsights: async () => {
+    const response = await api.get('/api/dashboard/insights');
+    return response.data.data;
+  },
 };
 
 export default dashboardService;

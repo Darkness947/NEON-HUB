@@ -6,7 +6,7 @@ const createUser = async (username, email, hashedPassword) => {
   const result = await pool.query(
     `INSERT INTO users (username, email, password)
      VALUES ($1, $2, $3)
-     RETURNING id, username, email, avatar_url, created_at`,
+     RETURNING id, username, email, avatar_url, bio, created_at`,
     [username, email, hashedPassword]
   );
   return result.rows[0];
@@ -14,7 +14,7 @@ const createUser = async (username, email, hashedPassword) => {
 
 const findUserByEmail = async (email) => {
   const result = await pool.query(
-    'SELECT id, username, email, password, avatar_url, created_at FROM users WHERE email = $1',
+    'SELECT id, username, email, password, avatar_url, bio, created_at FROM users WHERE email = $1',
     [email]
   );
   return result.rows[0] || null;
@@ -22,7 +22,7 @@ const findUserByEmail = async (email) => {
 
 const findUserById = async (id) => {
   const result = await pool.query(
-    'SELECT id, username, email, avatar_url, created_at FROM users WHERE id = $1',
+    'SELECT id, username, email, avatar_url, bio, created_at FROM users WHERE id = $1',
     [id]
   );
   return result.rows[0] || null;
@@ -72,12 +72,26 @@ const deleteAllRefreshTokensForUser = async (userId) => {
   await pool.query('DELETE FROM refresh_tokens WHERE user_id = $1', [userId]);
 };
 
+const updateBio = async (userId, bio) => {
+  const result = await pool.query(
+    'UPDATE users SET bio = $1 WHERE id = $2 RETURNING id, username, email, avatar_url, bio, created_at',
+    [bio, userId]
+  );
+  return result.rows[0] || null;
+};
+
+const deleteUser = async (userId) => {
+  await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+};
+
 module.exports = {
   createUser,
   findUserByEmail,
   findUserById,
   updateAvatar,
+  updateBio,
   updatePassword,
+  deleteUser,
   createRefreshToken,
   findRefreshTokensByUser,
   deleteRefreshToken,

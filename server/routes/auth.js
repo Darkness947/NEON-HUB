@@ -7,6 +7,7 @@ const {
   registerValidator,
   loginValidator,
   changePasswordValidator,
+  updateBioValidator,
 } = require('../validators/authValidator');
 
 const upload = require('../middleware/cloudinaryMiddleware');
@@ -23,5 +24,7 @@ router.post('/logout', authMiddleware, authController.logout);
 router.get('/profile', authMiddleware, authController.getProfile);
 router.put('/password', authMiddleware, changePasswordValidator, authController.changePassword);
 router.post('/avatar', authMiddleware, upload.single('avatar'), authController.uploadAvatar);
+router.put('/bio', authMiddleware, updateBioValidator, authController.updateBio);
+router.delete('/account', authMiddleware, authController.deleteAccount);
 
 module.exports = router;

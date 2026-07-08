@@ -50,8 +50,17 @@ const changePasswordValidator = [
     .withMessage('New password must contain at least one number'),
 ];
 
+const updateBioValidator = [
+  body('bio')
+    .optional({ nullable: true })
+    .isString()
+    .isLength({ max: 500 })
+    .withMessage('Bio cannot exceed 500 characters'),
+];
+
 module.exports = {
   registerValidator,
   loginValidator,
   changePasswordValidator,
+  updateBioValidator,
 };

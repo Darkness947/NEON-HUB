@@ -1,24 +1,27 @@
 import React from 'react';
 import { formatDate } from '../../utils/formatDate';
+import { useTranslation } from 'react-i18next';
 
-const getActionDetails = (action, mediaType) => {
+const getActionDetails = (action, mediaType, t) => {
   if (action === 'added_movie' || action === 'added_series' || action === 'added_game' || action === 'tracked_episode') {
-    return { icon: '➕', text: 'Added to library', color: 'var(--color-accent-purple)' };
+    return { icon: '➕', text: t('dashboard.activityAdded'), color: 'var(--color-accent-purple)' };
   }
   if (action === 'removed_movie' || action === 'removed_series' || action === 'removed_game') {
-    return { icon: '➖', text: 'Removed from library', color: 'var(--color-danger)' };
+    return { icon: '➖', text: t('dashboard.activityRemoved'), color: 'var(--color-danger)' };
   }
   if (action === 'updated_movie' || action === 'updated_series' || action === 'updated_game' || action === 'updated_episode') {
-    return { icon: '🔄', text: 'Updated tracking', color: 'var(--color-accent-blue)' };
+    return { icon: '🔄', text: t('dashboard.activityUpdated'), color: 'var(--color-accent-blue)' };
   }
-  return { icon: '📝', text: 'Activity', color: 'var(--color-text-secondary)' };
+  return { icon: '📝', text: t('dashboard.activityDefault'), color: 'var(--color-text-secondary)' };
 };
 
 const ActivityFeed = ({ activities }) => {
+  const { t } = useTranslation();
+
   if (!activities || activities.length === 0) {
     return (
       <div className="text-muted text-center py-4">
-        No recent activity. Start adding media to your library!
+        {t('dashboard.noActivity')}
       </div>
     );
   }
@@ -26,7 +29,7 @@ const ActivityFeed = ({ activities }) => {
   return (
     <div className="activity-feed">
       {activities.map((item) => {
-        const details = getActionDetails(item.action, item.media_type);
+        const details = getActionDetails(item.action, item.media_type, t);
         
         return (
           <div key={item.id} className="d-flex align-items-start mb-4 fade-in">
@@ -77,7 +80,7 @@ const ActivityFeed = ({ activities }) => {
                     {item.media_title}
                   </span>
                   <span className="text-muted text-capitalize" style={{ fontSize: '0.8rem' }}>
-                    {item.media_type}
+                    {t(`nav.${item.media_type === 'movie' ? 'movies' : item.media_type === 'game' ? 'games' : 'series'}`)}
                   </span>
                 </div>
               </div>

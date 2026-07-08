@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation();
+
   return (
     <footer 
       style={{
@@ -33,36 +36,36 @@ const Footer = () => {
               NEON HUB
             </Link>
             <p className="text-muted" style={{ fontSize: '0.95rem', maxWidth: '300px' }}>
-              Your ultimate digital media library. Track movies, series, and games in one beautifully crafted space.
+              {t('footer.description')}
             </p>
           </div>
           
           <div className="col-6 col-md-2 offset-md-2">
-            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>Explore</h5>
+            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>{t('footer.explore')}</h5>
             <ul className="list-unstyled d-flex flex-column gap-2">
-              <li><Link to="/" className="text-muted text-decoration-none">Home</Link></li>
-              <li><Link to="/discover?tab=movies" className="text-muted text-decoration-none">Movies</Link></li>
-              <li><Link to="/discover?tab=series" className="text-muted text-decoration-none">TV Series</Link></li>
-              <li><Link to="/discover?tab=games" className="text-muted text-decoration-none">Games</Link></li>
+              <li><Link to="/" className="text-muted text-decoration-none">{t('nav.home')}</Link></li>
+              <li><Link to="/discover?tab=movies" className="text-muted text-decoration-none">{t('nav.movies')}</Link></li>
+              <li><Link to="/discover?tab=series" className="text-muted text-decoration-none">{t('nav.series')}</Link></li>
+              <li><Link to="/discover?tab=games" className="text-muted text-decoration-none">{t('nav.games')}</Link></li>
             </ul>
           </div>
           
           <div className="col-6 col-md-2">
-            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>Account</h5>
+            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>{t('footer.account')}</h5>
             <ul className="list-unstyled d-flex flex-column gap-2">
-              <li><Link to="/dashboard" className="text-muted text-decoration-none">Dashboard</Link></li>
-              <li><Link to="/library" className="text-muted text-decoration-none">My Library</Link></li>
-              <li><Link to="/favorites" className="text-muted text-decoration-none">Favorites</Link></li>
-              <li><Link to="/lists" className="text-muted text-decoration-none">Custom Lists</Link></li>
+              <li><Link to="/dashboard" className="text-muted text-decoration-none">{t('nav.dashboard')}</Link></li>
+              <li><Link to="/library" className="text-muted text-decoration-none">{t('nav.library')}</Link></li>
+              <li><Link to="/favorites" className="text-muted text-decoration-none">{t('favorites.title')}</Link></li>
+              <li><Link to="/lists" className="text-muted text-decoration-none">{t('lists.title')}</Link></li>
             </ul>
           </div>
           
           <div className="col-12 col-md-2">
-            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>About</h5>
+            <h5 className="font-ui mb-3" style={{ color: 'var(--color-text-primary)' }}>{t('footer.about')}</h5>
             <ul className="list-unstyled d-flex flex-column gap-2">
-              <li><Link to="/contact" className="text-muted text-decoration-none">Contact</Link></li>
-              <li><a href="#" className="text-muted text-decoration-none">Privacy Policy</a></li>
-              <li><a href="#" className="text-muted text-decoration-none">Terms of Service</a></li>
+              <li><Link to="/contact" className="text-muted text-decoration-none">{t('footer.contact')}</Link></li>
+              <li><Link to="/privacy" className="text-muted text-decoration-none">{t('footer.privacy')}</Link></li>
+              <li><Link to="/terms" className="text-muted text-decoration-none">{t('footer.terms')}</Link></li>
             </ul>
           </div>
         </div>
@@ -72,10 +75,10 @@ const Footer = () => {
           style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}
         >
           <p className="text-muted mb-2 mb-md-0" style={{ fontSize: '0.85rem' }}>
-            &copy; {new Date().getFullYear()} Neon Hub. All rights reserved.
+            &copy; {new Date().getFullYear()} {t('footer.rights')}
           </p>
           <div className="d-flex gap-3">
-            <span className="text-muted" style={{ fontSize: '0.85rem' }}>Powered by TMDB & RAWG</span>
+            <span className="text-muted" style={{ fontSize: '0.85rem' }}>{t('footer.powered')}</span>
           </div>
         </div>
       </div>
