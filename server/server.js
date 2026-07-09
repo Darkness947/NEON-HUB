@@ -63,6 +63,7 @@ app.use('/api/library', libraryRoutes);
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/lists', require('./routes/lists'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {
@@ -82,8 +83,17 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Neon Hub server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  const neonAscii = `
+\x1b[35m███╗   ██╗\x1b[36m███████╗\x1b[35m ██████╗ \x1b[36m███╗   ██╗\x1b[0m    \x1b[35m██╗  ██╗\x1b[36m██╗   ██╗\x1b[35m██████╗ \x1b[0m
+\x1b[35m████╗  ██║\x1b[36m██╔════╝\x1b[35m██╔═══██╗\x1b[36m████╗  ██║\x1b[0m    \x1b[35m██║  ██║\x1b[36m██║   ██║\x1b[35m██╔══██╗\x1b[0m
+\x1b[35m██╔██╗ ██║\x1b[36m█████╗  \x1b[35m██║   ██║\x1b[36m██╔██╗ ██║\x1b[0m    \x1b[35m███████║\x1b[36m██║   ██║\x1b[35m██████╔╝\x1b[0m
+\x1b[35m██║╚██╗██║\x1b[36m██╔══╝  \x1b[35m██║   ██║\x1b[36m██║╚██╗██║\x1b[0m    \x1b[35m██╔══██║\x1b[36m██║   ██║\x1b[35m██╔══██╗\x1b[0m
+\x1b[35m██║ ╚████║\x1b[36m███████╗\x1b[35m╚██████╔╝\x1b[36m██║ ╚████║\x1b[0m    \x1b[35m██║  ██║\x1b[36m╚██████╔╝\x1b[35m██████╔╝\x1b[0m
+\x1b[35m╚═╝  ╚═══╝\x1b[36m╚══════╝\x1b[35m ╚═════╝ \x1b[36m╚═╝  ╚═══╝\x1b[0m    \x1b[35m╚═╝  ╚═╝\x1b[36m ╚═════╝ \x1b[35m╚═════╝ \x1b[0m
+`;
+  console.log(neonAscii);
+  console.log(`🚀 \x1b[32mNeon Hub server running on port ${PORT}\x1b[0m`);
+  console.log(`📍 \x1b[33mEnvironment: ${process.env.NODE_ENV || 'development'}\x1b[0m`);
 });
 
 module.exports = app;

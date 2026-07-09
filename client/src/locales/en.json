@@ -109,9 +109,26 @@
     "highestRated": "Highest Rated",
     "search": "Search library...",
     "noItems": "No items match your filters.",
-    "emptyTitle": "No {{type}} in your library yet",
-    "emptyMessage": "Explore and add some {{type}} to keep track of what you're watching and playing.",
+    "emptyTitle": "Your {{type}} list is empty",
+    "emptyMessage": "Start tracking {{type}} by adding them to your library.",
+    "recommendWithAi": "Recommend with AI",
+    "compareMode": "Compare Mode",
+    "cancelCompare": "Cancel",
+    "selectedOutOfTwo": "of 2 selected",
+    "compareWithAi": "Compare with AI",
+    "backToLibrary": "Back to Library",
     "discoverMedia": "Discover Media"
+  },
+  "ai": {
+    "analyzingTaste": "AI is analyzing your library...",
+    "analyzingComparison": "AI is comparing selected items...",
+    "yourRecommendations": "Your Recommendations",
+    "becauseYouLiked": "Because you liked:",
+    "comparisonResults": "Comparison Results",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "finalVerdict": "AI Final Verdict",
+    "whoShouldWatch": "Who Should Watch It?"
   },
   "media": {
     "overview": "Overview",

@@ -99,6 +99,17 @@ CREATE TABLE IF NOT EXISTS activity_log (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- TABLE 9: ai_cache
+CREATE TABLE IF NOT EXISTS ai_cache (
+  id           SERIAL PRIMARY KEY,
+  user_id      INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  feature      VARCHAR(50) NOT NULL,
+  media_type   VARCHAR(10) NOT NULL,
+  request_hash TEXT UNIQUE NOT NULL,
+  response     JSONB NOT NULL,
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ═══════════════════════════════════════════════════════════════
 -- INDEXES
 -- ═══════════════════════════════════════════════════════════════
@@ -108,3 +119,4 @@ CREATE INDEX IF NOT EXISTS idx_tracked_games_user    ON tracked_games(user_id);
 CREATE INDEX IF NOT EXISTS idx_activity_log_user     ON activity_log(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user   ON refresh_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_list_items_list       ON list_items(list_id);
+CREATE INDEX IF NOT EXISTS idx_ai_cache_hash         ON ai_cache(request_hash);

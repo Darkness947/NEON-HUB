@@ -14,6 +14,7 @@ import SkeletonDetail from '../../components/common/SkeletonDetail';
 import ScrollableRow from '../../components/common/ScrollableRow';
 import InlineRating from '../../components/media/InlineRating';
 import toast from 'react-hot-toast';
+import { Helmet } from 'react-helmet-async';
 
 const GameDetail = () => {
   const { id } = useParams();
@@ -104,6 +105,13 @@ const GameDetail = () => {
 
   return (
     <div className="fade-in">
+      <Helmet>
+        <title>{game.title} - NEON HUB</title>
+        <meta name="description" content={game.description?.replace(/<[^>]*>?/gm, '').substring(0, 150)} />
+        <meta property="og:title" content={`${game.title} - NEON HUB`} />
+        <meta property="og:description" content={game.description?.replace(/<[^>]*>?/gm, '').substring(0, 150)} />
+        <meta property="og:image" content={heroBackground} />
+      </Helmet>
       {/* Hero Section */}
       <div 
         style={{

@@ -14,6 +14,7 @@ import ScrollableRow from '../../components/common/ScrollableRow';
 import InlineRating from '../../components/media/InlineRating';
 import EpisodeGuide from '../../components/media/EpisodeGuide';
 import toast from 'react-hot-toast';
+import { Helmet } from 'react-helmet-async';
 import libraryService from '../../services/libraryService';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -116,6 +117,13 @@ const SeriesDetail = () => {
 
   return (
     <div className="fade-in">
+      <Helmet>
+        <title>{series.title} - NEON HUB</title>
+        <meta name="description" content={series.overview?.substring(0, 150)} />
+        <meta property="og:title" content={`${series.title} - NEON HUB`} />
+        <meta property="og:description" content={series.overview?.substring(0, 150)} />
+        <meta property="og:image" content={series.poster_url} />
+      </Helmet>
       {/* Hero Section */}
       <div 
         style={{

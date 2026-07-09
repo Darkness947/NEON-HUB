@@ -29,6 +29,8 @@ import MyRatings from '../pages/profile/MyRatings';
 import Contact from '../pages/Contact';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import TermsOfService from '../pages/TermsOfService';
+import AiRecommendations from '../pages/ai/AiRecommendations';
+import AiComparison from '../pages/ai/AiComparison';
 
 // ─── Protected Route Wrapper ──────────────────────────────────────────────────
 const ProtectedRoute = () => {
@@ -90,6 +92,8 @@ const AppRouter = () => {
             <Route path="/reviews" element={<MyReviews />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/ai/recommendations/:mediaType" element={<AiRecommendations />} />
+            <Route path="/ai/compare/:mediaType/:mediaId1/:mediaId2" element={<AiComparison />} />
           </Route>
 
           {/* 404 */}

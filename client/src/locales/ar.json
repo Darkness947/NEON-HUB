@@ -109,9 +109,26 @@
     "highestRated": "الأعلى تقييماً",
     "search": "البحث في المكتبة...",
     "noItems": "لا توجد عناصر تطابق بحثك.",
-    "emptyTitle": "لا يوجد أي {{type}} في مكتبتك حتى الآن",
-    "emptyMessage": "استكشف وأضف بعض الـ {{type}} لتتبع ما تشاهده وتلعبه.",
-    "discoverMedia": "اكتشاف المحتوى"
+    "emptyTitle": "قائمة {{type}} الخاصة بك فارغة",
+    "emptyMessage": "ابدأ بتتبع {{type}} عن طريق إضافتها إلى مكتبتك.",
+    "recommendWithAi": "اقتراحات الذكاء الاصطناعي",
+    "compareMode": "وضع المقارنة",
+    "cancelCompare": "إلغاء",
+    "selectedOutOfTwo": "من أصل ٢ محدد",
+    "compareWithAi": "مقارنة بالذكاء الاصطناعي",
+    "backToLibrary": "العودة للمكتبة",
+    "discoverMedia": "استكشف الوسائط"
+  },
+  "ai": {
+    "analyzingTaste": "يقوم الذكاء الاصطناعي بتحليل مكتبتك...",
+    "analyzingComparison": "يقوم الذكاء الاصطناعي بمقارنة العناصر المحددة...",
+    "yourRecommendations": "توصياتك",
+    "becauseYouLiked": "لأنك أحببت:",
+    "comparisonResults": "نتائج المقارنة",
+    "strengths": "نقاط القوة",
+    "weaknesses": "نقاط الضعف",
+    "finalVerdict": "الحكم النهائي للذكاء الاصطناعي",
+    "whoShouldWatch": "من يجب أن يشاهده؟"
   },
   "media": {
     "overview": "نبذة",

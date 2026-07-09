@@ -5,7 +5,7 @@ import { useLibrary } from '../../hooks/useLibrary';
 import StatusDropdown from './StatusDropdown';
 import { getStatusColor } from '../../utils/getStatusColor';
 
-const GameCard = ({ rawg_id, title, poster_url, release_date, vote_average, platforms, showDropdown = false }) => {
+const GameCard = ({ rawg_id, title, poster_url, release_date, vote_average, platforms, showDropdown = false, selectable = false, selected = false, onSelect }) => {
   const { isInLibrary, addToLibrary, removeFromLibrary, toggleFavorite } = useLibrary();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -40,8 +40,37 @@ const GameCard = ({ rawg_id, title, poster_url, release_date, vote_average, plat
     }
   };
 
+  const handleClick = (e) => {
+    if (selectable) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (onSelect) onSelect(rawg_id);
+    }
+  };
+
   return (
-    <Link to={`/games/${rawg_id}`} className={`media-card ${isDropdownOpen ? 'has-open-dropdown' : ''}`}>
+    <Link to={`/games/${rawg_id}`} className={`media-card ${isDropdownOpen ? 'has-open-dropdown' : ''} ${selected ? 'selected-card' : ''}`} onClick={handleClick}>
+      {selectable && (
+        <div 
+          className="position-absolute d-flex align-items-center justify-content-center"
+          style={{
+            top: '10px',
+            left: '10px',
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            backgroundColor: selected ? 'var(--color-accent-purple)' : 'rgba(0,0,0,0.5)',
+            border: `2px solid ${selected ? 'var(--color-accent-purple)' : 'rgba(255,255,255,0.7)'}`,
+            zIndex: 11,
+            transition: 'all 0.2s',
+            color: '#fff',
+            fontSize: '14px'
+          }}
+        >
+          {selected && '✓'}
+        </div>
+      )}
+      
       {poster_url ? (
         <img src={poster_url} alt={title} className="media-card-poster" loading="lazy" />
       ) : (
