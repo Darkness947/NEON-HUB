@@ -1,8 +1,14 @@
-# Phase 8 Report: UI Polish and Optimization
+<div align="center">
+  <img src="../client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="200" />
+  <h1>Phase 8 Report: UI Polish and Optimization</h1>
+  <p><strong>Neon Hub Development Report</strong></p>
+  <hr />
+</div>
+
 
 ## Status: COMPLETE
 
-## Deliverables Completed
+## ✅ Deliverables Completed
 - **Skeleton Loaders:** Replaced generic spinners with shimmer-animated `SkeletonCard` and `SkeletonDetail` components across `Library`, `Favorites`, `Discover`, `Home`, `SearchResults`, and Detail pages.
 - **Empty States:** Created a highly reusable `EmptyState` component displaying an icon, message, and action button. Applied it to `Library`, `Favorites`, `MyReviews`, `CustomLists`, and `SearchResults`.
 - **Error Boundary:** Implemented a top-level React `ErrorBoundary` in `App.jsx` to catch rendering crashes and display a branded fallback screen.
@@ -23,14 +29,18 @@
   - Added full RTL (Right-to-Left) UI support.
   - Updated `ScrollableRow` to perfectly handle RTL-native scroll physics and negative `scrollLeft` values.
 
-## Technical Decisions
+## 🧠 Technical Decisions
 - **CSS Porting Strategy:** Rather than simply importing `neon.css` alongside `main.css` (which could cause override conflicts), I analyzed `neon.css` and strategically integrated its keyframes, utility classes, and variables directly into `main.css` and `media.css`. This ensures the existing design system scales without breaking.
 - **Error Boundary Implementation:** Used a standard class component for the Error Boundary, as React does not currently support error boundaries via functional hooks.
 - **RTL Scroll Handling:** Standardized RTL horizontal scrolling by measuring the absolute `scrollLeft` position coupled with browser `direction` computation. This resolves differing behavior engines (Blink vs Webkit) handle negative scroll values in RTL.
 - **Activity Feed Merging:** Merged and deduplicated reviews and ratings on the frontend inside the Profile component using `Promise.all` across multiple backend API calls, prioritizing the most recent timestamp. This prevents duplicate entries when a user both rates and reviews a single media item.
 
-## Known Issues or Pending Refinements
-- None. The UI is visually polished, cohesive, natively supports multi-language (LTR/RTL), handles error states, and meets all feature requirements.
+## ⚠️ Known Issues
+
+> [!WARNING]
+> or Pending Refinements
+> - None. The UI is visually polished, cohesive, natively supports multi-language (LTR/RTL), handles error states, and meets all feature requirements.
+
 
 ## Readiness for Next Phase
 - We are fully ready to proceed.

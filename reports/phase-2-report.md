@@ -1,14 +1,20 @@
-# Phase 2 Report — Authentication System
+<div align="center">
+  <img src="../client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="200" />
+  <h1>Phase 2 Report — Authentication System</h1>
+  <p><strong>Neon Hub Development Report</strong></p>
+  <hr />
+</div>
+
 **Date Completed:** 2026-06-29
 **Status:** ✅ Complete
 
-## Summary
+## 📝 Summary
 
 Phase 2 established the complete, secure Authentication System for Neon Hub. The backend supports user registration with password complexity enforcement, secure login with rate limiting, access tokens (JWTs), and opaque refresh tokens stored in an HttpOnly cookie with rotation upon refresh. The frontend implements an auth-aware state via React Context (`AuthProvider`), memory-only access token storage, automatic silent refresh on application startup/reload, Axios interceptors to automatically retry requests upon token expiry, login/registration pages, and client-side route protection.
 
 The implementation was validated using automated browser tests confirming registration, login, dashboard access, navigation states, session persistence, and redirection guards.
 
-## Deliverables Completed
+## ✅ Deliverables Completed
 
 ### Backend
 - ✅ `server/validators/authValidator.js` — Enforces username formatting, email formatting/normalization, and password complexity (minimum 8 chars, 1 uppercase, 1 lowercase, 1 number).
@@ -30,7 +36,7 @@ The implementation was validated using automated browser tests confirming regist
 - ✅ Placeholders for `Home.jsx`, `NotFound.jsx`, and `Dashboard.jsx`.
 - ✅ Wired provider and router into `client/src/App.jsx`.
 
-## Files Created / Modified
+## 📂 Files Created / Modified
 
 | File | Action | Description |
 |------|--------|-------------|
@@ -66,10 +72,12 @@ Verified the full authentication sequence using the automated browser subagent:
 - **Session Expiry & Redirects**: Direct access to `/dashboard` while unauthenticated triggers immediate redirection to `/login`.
 - **Logout**: Cleared sessions from DB and frontend storage.
 
-## What's Next
+## 🚀 What's Next
 
-**Phase 3 — Media Discovery System** will build out search and display capabilities:
-- Integration with external TMDB (Movies / TV shows) and RAWG (Games) APIs.
-- Backend routing/caching for popular, trending, and searched items.
-- Shared search page on the frontend displaying unified, responsive cards.
-- Custom detail modals or details pages for each media item type.
+> [!NOTE]
+> **Phase 3 — Media Discovery System** will build out search and display capabilities:
+> - Integration with external TMDB (Movies / TV shows) and RAWG (Games) APIs.
+> - Backend routing/caching for popular, trending, and searched items.
+> - Shared search page on the frontend displaying unified, responsive cards.
+> - Custom detail modals or details pages for each media item type.
+

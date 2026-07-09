@@ -1,106 +1,133 @@
-# Neon Hub
+<div align="center">
+  <img src="client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="300" />
 
-**A production-grade, full-stack media tracking platform.**
+  <h1>Neon Hub</h1>
 
-Track your movies, TV series, and video games in one beautiful, dark-themed dashboard. Rate, review, and organize your media library with custom lists and favorites.
+  <p>
+    <strong>A production-grade, full-stack media tracking platform.</strong>
+  </p>
 
-## Tech Stack
+  <p>
+    <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version" />
+    <img src="https://img.shields.io/badge/license-ISC-green.svg" alt="License" />
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+  </p>
 
-### Frontend
-- **React** (with Vite) — fast, modern UI
-- **Bootstrap 5** — responsive layout and components
-- **React Router DOM v6** — client-side routing
-- **Axios** — HTTP client with interceptors for auth
+  <h3>
+    <a href="documentation/walkthrough.md">Explore the Walkthrough</a>
+    <span> | </span>
+    <a href="documentation/final-documentation.md">Read the Docs</a>
+    <span> | </span>
+    <a href="diagrams/system-architecture.md">View Architecture</a>
+  </h3>
+</div>
 
-### Backend
-- **Node.js 20+ / Express.js** — REST API server
-- **PostgreSQL** (via `pg`) — relational database hosted on Neon DB
-- **JWT + bcrypt** — secure authentication with refresh tokens
-- **helmet + cors + express-rate-limit** — security middleware
-- **node-cache** — in-memory caching for trending content
-- **Cloudinary** — avatar image storage
+<br />
 
-### External APIs
-- **TMDB** — movie and TV series metadata
-- **RAWG** — video game metadata
+## 🌟 Overview
 
-### Deployment
-- **Frontend**: Netlify (free tier)
-- **Backend**: Render (free tier)
-- **Database**: Neon DB (free tier)
-- **Storage**: Cloudinary (free tier)
+**Neon Hub** is the ultimate dashboard for organizing your digital life. Whether you're tracking the latest blockbuster movies, binge-watching TV series, or managing your video game backlog, Neon Hub provides a sleek, dark-themed, and responsive interface to keep everything in one place.
 
-## Getting Started
+Powered by industry-leading APIs (TMDB & RAWG) and augmented with cutting-edge AI (Google Gemini), Neon Hub doesn't just track your media—it helps you discover what to experience next.
+
+---
+
+## 🚀 Key Features
+
+*   🤖 **AI-Powered Insights:** Generate smart recommendations and deep side-by-side media comparisons using Google Gemini.
+*   🎬 **Unified Library:** Track Movies, TV Series, and Video Games seamlessly in a single dashboard.
+*   🌍 **Multi-Language Support:** Fully localized in English and Arabic with seamless RTL (Right-to-Left) UI transitions.
+*   📊 **Rich Analytics:** View dynamic charts and progress rings detailing your completion rates and top genres.
+*   ⭐ **Reviews & Ratings:** Rate your media and write detailed reviews.
+*   📋 **Custom Lists:** Organize your content into personalized, custom-curated lists.
+*   📱 **Fully Responsive:** Built with Bootstrap 5 and custom CSS to look beautiful on desktop, tablet, and mobile.
+*   🛡️ **Production-Ready Security:** JWT authentication, bcrypt hashing, rate-limiting, and comprehensive error handling.
+
+---
+
+## 🛠️ Tech Stack
+
+<div align="center">
+  <img src="https://skillicons.dev/icons?i=react,vite,js,css,bootstrap,nodejs,express,postgres,netlify" alt="Tech Stack" />
+</div>
+
+<br />
+
+| Layer | Technologies |
+| --- | --- |
+| **Frontend** | React, Vite, React Router v6, Bootstrap 5, Axios, i18next, React Helmet |
+| **Backend** | Node.js (v22), Express.js, PostgreSQL (pg), JWT, bcrypt, node-cache |
+| **Third-Party APIs** | TMDB (Movies/TV), RAWG (Games), Cloudinary (Images), Gemini (AI) |
+| **Deployment Infrastructure** | Netlify (Frontend), Render (Backend), Neon DB (Database) |
+
+---
+
+## 🗺️ Documentation & Diagrams
+
+We take pride in our comprehensive documentation. Explore the links below to understand how Neon Hub is built under the hood:
+
+### 📖 Documentation
+*   [Functional Requirements](documentation/requirements.md)
+*   [User Walkthrough](documentation/walkthrough.md)
+*   [Final Technical Documentation](documentation/final-documentation.md)
+
+### 📊 Diagrams (Mermaid.js)
+*   [System Architecture](diagrams/system-architecture.md)
+*   [Entity Relationship Diagram (ERD)](diagrams/erd.md)
+*   [Conceptual Class Diagram](diagrams/class-diagram.md)
+*   [System Use Cases](diagrams/use-cases.md)
+*   [Authentication Sequence](diagrams/sequence-auth.md)
+*   [AI Integration Sequence](diagrams/sequence-ai.md)
+*   **Workflows:**
+    *   [Add Media Workflow](diagrams/workflow-add-media.md)
+    *   [Review & Rating Workflow](diagrams/workflow-review.md)
+    *   [AI Compare Workflow](diagrams/workflow-compare-ai.md)
+    *   [AI Recommend Workflow](diagrams/workflow-recommend-ai.md)
+
+---
+
+## 🚦 Getting Started
 
 ### Prerequisites
-- Node.js 20+
-- npm 9+
+*   Node.js 20+
+*   npm 9+
+*   PostgreSQL (Local or Cloud, e.g., Neon DB)
+*   API Keys: TMDB, RAWG, Cloudinary, Gemini
 
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone <repo-url>
-   cd neon-hub
-   ```
-
-2. **Set up the backend:**
-   ```bash
-   cd server
-   npm install
-   cp .env.example .env
-   # Fill in your .env values (see .env.example for required variables)
-   npm run dev
-   ```
-
-3. **Set up the frontend:**
-   ```bash
-   cd client
-   npm install
-   cp .env.example .env
-   # Set VITE_API_URL=http://localhost:5000
-   npm run dev
-   ```
-
-4. **Open the app:**
-   Navigate to `http://localhost:5173` in your browser.
-
-## Project Structure
-
-```
-/neon-hub
-├── client/          ← React frontend (Vite)
-│   ├── src/
-│   │   ├── components/   (common, media, dashboard, layout)
-│   │   ├── context/      (Auth, Library, Search, Theme)
-│   │   ├── hooks/        (useDebounce, useAuth, useLibrary, etc.)
-│   │   ├── pages/        (auth, movies, series, games, dashboard, profile)
-│   │   ├── routes/       (AppRouter with ProtectedRoute)
-│   │   ├── services/     (api.js, authService, mediaService, libraryService)
-│   │   ├── styles/       (main.css design system)
-│   │   └── utils/        (formatDate, truncateText, etc.)
-│   └── netlify.toml
-│
-├── server/          ← Express backend
-│   ├── config/       (db.js, cache.js)
-│   ├── controllers/  (auth, movies, series, games, library, reviews, lists, dashboard)
-│   ├── middleware/    (authMiddleware, errorHandler, rateLimiter, cloudinary)
-│   ├── models/       (user, library, review, list, activity)
-│   ├── routes/       (auth, movies, series, games, library, reviews, lists, dashboard)
-│   ├── services/     (tmdbService, rawgService, emailService)
-│   ├── validators/   (auth, library, review)
-│   ├── database/     (schema.sql, seed.sql)
-│   └── server.js
-│
-└── reports/         ← Phase completion reports
+### 1. Clone the repository
+```bash
+git clone https://github.com/yourusername/neon-hub.git
+cd neon-hub
 ```
 
-## Environment Variables
+### 2. Setup the Backend
+```bash
+cd server
+npm install
+cp .env.example .env
+```
+*Fill in your `.env` values (Database URL, API Keys, JWT Secret).*
+```bash
+npm run dev
+```
 
-See `server/.env.example` and `client/.env.example` for all required variables.
+### 3. Setup the Frontend
+```bash
+cd client
+npm install
+cp .env.example .env
+```
+*Ensure `VITE_API_URL` is pointing to your backend (e.g., `http://localhost:5000`).*
+```bash
+npm run dev
+```
 
-> **Important:** Never commit `.env` files. Only `.env.example` files with empty values should be in version control.
+### 4. Open the App
+Navigate to `http://localhost:5173` in your browser.
 
-## License
+---
 
-ISC
+
+<div align="center">
+  <i>Built with ❤️ for media enthusiasts everywhere.</i>
+</div>

@@ -1,4 +1,10 @@
-# AI Features Implementation Report
+<div align="center">
+  <img src="../client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="200" />
+  <h1>AI Features Implementation Report</h1>
+  <p><strong>Neon Hub Development Report</strong></p>
+  <hr />
+</div>
+
 
 ## Overview
 The AI Features implementation integrated the Gemini AI to provide intelligent insights based on the user's personal media library. The implementation focused on cost-efficiency, strict rate limiting handling, structured JSON outputs, and beautiful, responsive UI integration across English and Arabic layouts.

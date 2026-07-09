@@ -1,12 +1,18 @@
-# Phase 3 Report — Media Discovery System
+<div align="center">
+  <img src="../client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="200" />
+  <h1>Phase 3 Report — Media Discovery System</h1>
+  <p><strong>Neon Hub Development Report</strong></p>
+  <hr />
+</div>
+
 
 **Date Completed:** 2026-07-01
 **Status:** ✅ Complete
 
-## Summary
+## 📝 Summary
 This phase integrated TMDB (The Movie Database) into Neon Hub, enabling users to discover, search, and view detailed information for movies and TV series. The backend acts as a secure API proxy to prevent exposing TMDB API credentials, maps and cleans API payloads to match Neon Hub data structures, and uses an in-memory cache to reduce external API overhead. On the frontend, discovery grids with infinite scroll pagination, detail pages, and dynamic search capability are now fully functional.
 
-## Deliverables Completed
+## ✅ Deliverables Completed
 - [x] TMDB Service proxy in `tmdbService.js` with trending, popular, upcoming, details, and search logic
 - [x] Node Cache integration for `/trending` endpoints (10 min TTL)
 - [x] Movies controller (`moviesController.js`) and routes (`routes/movies.js`)
@@ -18,7 +24,7 @@ This phase integrated TMDB (The Movie Database) into Neon Hub, enabling users to
 - [x] Detail page for TV Series (`SeriesDetail.jsx`) showing seasons list and episodes list
 - [x] Skeleton Card component (`SkeletonCard.jsx`) with shimmering animations
 
-## Files Created / Modified
+## 📂 Files Created / Modified
 
 | File | Action | Description |
 |------|--------|-------------|
@@ -41,21 +47,28 @@ This phase integrated TMDB (The Movie Database) into Neon Hub, enabling users to
 | client/src/routes/AppRouter.jsx | Modified | Added details routes for movies and series pages |
 | client/src/styles/media.css | Created | Layout, transition, hover styles, and loading animations for card components |
 
-## Technical Decisions
+## 🧠 Technical Decisions
 - **Strict Backend Proxying**: Adhered to the security guidelines to never expose `TMDB_API_KEY` on the frontend. The client talks exclusively to internal endpoints.
 - **In-Memory Caching**: Implemented simple in-memory caching using the `node-cache` package on backend trending endpoints with a 10-minute TTL to reduce latency and API usage.
 - **Payload Cleaning**: Filtered TMDB response bodies to only return fields used by the UI (e.g. poster and backdrop mappings, release year, title).
 
-## Third-Party Services Connected
+## 🔌 Third-Party Services Connected
 - **TMDB API**: Connected backend client using axios request filters mapping `api_key` param.
 
-## Known Issues / Limitations
-- None. Media discovery and detail loading is fully functional.
+## ⚠️ Known Issues
 
-## Testing Performed
+> [!WARNING]
+> / Limitations
+> - None. Media discovery and detail loading is fully functional.
+
+
+## 🧪 Testing Performed
 - Manually tested search queries via the navbar and validated the grid updates.
 - Verified pagination triggers by scrolling to the bottom of the grid on the Discover page.
 - Checked season/episode accordion toggle triggers on the TV Series detail page.
 
-## What's Next
-- Proceeding to Phase 4 (RAWG Integration) to build out the gaming catalog.
+## 🚀 What's Next
+
+> [!NOTE]
+> - Proceeding to Phase 4 (RAWG Integration) to build out the gaming catalog.
+

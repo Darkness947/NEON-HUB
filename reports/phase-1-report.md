@@ -1,12 +1,18 @@
-# Phase 1 Report — Project Setup & Scaffolding
+<div align="center">
+  <img src="../client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="200" />
+  <h1>Phase 1 Report — Project Setup & Scaffolding</h1>
+  <p><strong>Neon Hub Development Report</strong></p>
+  <hr />
+</div>
+
 **Date Completed:** 2026-06-28
 **Status:** ✅ Complete
 
-## Summary
+## 📝 Summary
 
 Phase 1 established the complete project skeleton for Neon Hub. Both the Express backend and React frontend are initialized with all dependencies, the full directory structure matches the architecture document, and the Neon DB PostgreSQL database is connected with all 8 tables created. The health check endpoint responds correctly, the frontend dev server compiles, and no secrets are committed to version control.
 
-## Deliverables Completed
+## ✅ Deliverables Completed
 
 - ✅ Full directory structure created as defined in the architecture document (Section 3)
 - ✅ Frontend initialized with Vite + React (JavaScript, not TypeScript)
@@ -31,7 +37,7 @@ Phase 1 established the complete project skeleton for Neon Hub. Both the Express
 - ✅ Database connection verified on startup
 - ✅ All tables created in Neon DB
 
-## Files Created / Modified
+## 📂 Files Created / Modified
 
 | File | Action | Description |
 |------|--------|-------------|
@@ -61,7 +67,7 @@ Phase 1 established the complete project skeleton for Neon Hub. Both the Express
 | `client/netlify.toml` | Created | SPA redirect: /* → /index.html (200) |
 | `README.md` | Created | Project overview, tech stack, getting started guide |
 
-## Technical Decisions
+## 🧠 Technical Decisions
 
 1. **Vite template cleanup:** The `npm create vite@latest` with `--template react` generated a TypeScript-based project in Vite 8. Removed `tsconfig.json`, TypeScript dependency, and `tsc` from the build script since the project uses JavaScript per the architecture document.
 
@@ -71,19 +77,23 @@ Phase 1 established the complete project skeleton for Neon Hub. Both the Express
 
 4. **Schema runner script:** Created `database/runSchema.js` as a convenience script instead of requiring the user to manually paste SQL into the Neon DB console. This is more reliable and reproducible.
 
-## Third-Party Services Connected
+## 🔌 Third-Party Services Connected
 
 | Service | Status | Notes |
 |---------|--------|-------|
 | Neon DB | ✅ Connected | PostgreSQL serverless, eu-central-1 region, SSL enabled |
 
-## Known Issues / Limitations
+## ⚠️ Known Issues
 
-1. **pg SSL warning:** Node outputs a deprecation warning about SSL mode semantics changing in pg v9. This is informational only and does not affect functionality. The warning will be resolved when pg updates its major version.
+> [!WARNING]
+> / Limitations
+> 
+> 1. **pg SSL warning:** Node outputs a deprecation warning about SSL mode semantics changing in pg v9. This is informational only and does not affect functionality. The warning will be resolved when pg updates its major version.
+> 
+> 2. **No favicon:** The default Vite favicon is referenced but may not exist. Will be replaced with a proper Neon Hub favicon in Phase 8 (UI Polish).
 
-2. **No favicon:** The default Vite favicon is referenced but may not exist. Will be replaced with a proper Neon Hub favicon in Phase 8 (UI Polish).
 
-## Testing Performed
+## 🧪 Testing Performed
 
 | Test | Method | Result |
 |------|--------|--------|
@@ -94,13 +104,15 @@ Phase 1 established the complete project skeleton for Neon Hub. Both the Express
 | Frontend build | `npm run build` | ✅ Builds to dist/ in 388ms, no errors |
 | .env security | `.gitignore` inspection | ✅ Both .env files excluded from git |
 
-## What's Next
+## 🚀 What's Next
 
-**Phase 2 — Authentication System** will build the complete auth flow:
-- JWT access tokens (24h) + opaque refresh tokens (7d, httpOnly cookie)
-- Register, login, logout, silent refresh, password change
-- Auth middleware protecting routes
-- Login rate limiting (5 attempts / 15 min)
-- Frontend: AuthContext, login/register pages, ProtectedRoute, Navbar
+> [!NOTE]
+> **Phase 2 — Authentication System** will build the complete auth flow:
+> - JWT access tokens (24h) + opaque refresh tokens (7d, httpOnly cookie)
+> - Register, login, logout, silent refresh, password change
+> - Auth middleware protecting routes
+> - Login rate limiting (5 attempts / 15 min)
+> - Frontend: AuthContext, login/register pages, ProtectedRoute, Navbar
+> 
+> Phase 2 will require a **JWT_SECRET** environment variable (STOP protocol will be triggered).
 
-Phase 2 will require a **JWT_SECRET** environment variable (STOP protocol will be triggered).

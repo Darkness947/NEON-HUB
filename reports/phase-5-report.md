@@ -1,9 +1,15 @@
-# Phase 5 Report: Library & Tracking System
+<div align="center">
+  <img src="../client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="200" />
+  <h1>Phase 5 Report: Library & Tracking System</h1>
+  <p><strong>Neon Hub Development Report</strong></p>
+  <hr />
+</div>
+
 
 ## Overview
 Phase 5 focused on building the core tracking system allowing users to add movies, series, and games to their personal libraries, manage statuses (e.g., watching, completed, planned), toggle favorites, and log their activity.
 
-## Deliverables Completed
+## ✅ Deliverables Completed
 - **Backend Setup (`server/controllers/libraryController.js`, `server/models/libraryModel.js`, `server/models/activityModel.js`)**: 
   - Created endpoints for `/api/library/add`, `/update`, `/remove`, `/`, and `/favorites`.
   - Implemented data access layers using parameterized SQL queries.
@@ -34,7 +40,7 @@ Phase 5 focused on building the core tracking system allowing users to add movie
 - [x] Protected routes are wrapped in `<ProtectedRoute>` in `AppRouter.jsx`.
 - [x] Loading and empty states are appropriately handled in the UI.
 
-## Technical Decisions
+## 🧠 Technical Decisions
 - **Validation Splitting**: The validation logic for library items was split into `validateLibraryAdd` and `validateLibraryUpdate`. This was necessary because the `status` field is strictly required when adding an item for the first time, but must be optional during updates (e.g., when a user only wants to toggle a favorite or update a rating).
 - **Context-based Synchronization**: We elected to use a global `LibraryContext` to maintain the user's library state. This ensures that when a user favorites an item on the `MovieDetail` page, the change is immediately reflected on the `Favorites` page or any `MediaCard` on the screen without requiring a page reload or redundant API calls.
 

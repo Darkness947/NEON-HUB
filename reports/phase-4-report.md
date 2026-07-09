@@ -1,12 +1,18 @@
-# Phase 4 Report — Game Discovery System
+<div align="center">
+  <img src="../client/src/assets/images/main_logo.png" alt="Neon Hub Logo" width="200" />
+  <h1>Phase 4 Report — Game Discovery System</h1>
+  <p><strong>Neon Hub Development Report</strong></p>
+  <hr />
+</div>
+
 
 **Date Completed:** 2026-07-02
 **Status:** ✅ Complete
 
-## Summary
+## 📝 Summary
 This phase integrated RAWG API into Neon Hub to support gaming media discovery alongside movies and TV series. The backend service proxy was extended to handle game searches, trending lists, details, screenshots, and related games, cached for 10 minutes to maintain optimal performance. The client UI has been updated to support a dedicated "Games" tab in the Discover and Search Results screens, displaying custom platform badges and ratings on a newly created GameCard component.
 
-## Deliverables Completed
+## ✅ Deliverables Completed
 - [x] RAWG API backend wrapper client mapping, cleaning, and caching results (`rawgService.js`)
 - [x] Games controller (`gamesController.js`) and routes (`routes/games.js`)
 - [x] Mount games route endpoint in `server.js`
@@ -16,7 +22,7 @@ This phase integrated RAWG API into Neon Hub to support gaming media discovery a
 - [x] Search results screen "Games" tab displaying game matching cards
 - [x] Detail view for Games (`GameDetail.jsx`) showing developers, publishers, accordion details, screenshots, and similar franchise games
 
-## Files Created / Modified
+## 📂 Files Created / Modified
 
 | File | Action | Description |
 |------|--------|-------------|
@@ -31,20 +37,27 @@ This phase integrated RAWG API into Neon Hub to support gaming media discovery a
 | client/src/pages/SearchResults.jsx | Modified | Added "Games" results column tab |
 | client/src/routes/AppRouter.jsx | Modified | Registered `/games/:id` details route |
 
-## Technical Decisions
+## 🧠 Technical Decisions
 - **Custom GameCard**: Built a custom card format distinct from `MediaCard` due to differences in properties (e.g. platforms and 5-star ratings vs 10-star TMDB scale).
 - **Parallel Detail Fetches**: Used `Promise.all` in the backend service wrapper to fetch game details and screenshots concurrently, speeding up response times.
 
-## Third-Party Services Connected
+## 🔌 Third-Party Services Connected
 - **RAWG API**: Backend client proxy using axios queries mapping `key` parameter.
 
-## Known Issues / Limitations
-- None. Game discovery and detail displays are fully operational.
+## ⚠️ Known Issues
 
-## Testing Performed
+> [!WARNING]
+> / Limitations
+> - None. Game discovery and detail displays are fully operational.
+
+
+## 🧪 Testing Performed
 - Manually searched for games (e.g. "Cyberpunk", "Witcher") and verified results loaded.
 - Scrolling down the Games tab on the Discover screen successfully triggered additional page fetches.
 - Navigating to game details displayed screenshots and platform badges properly.
 
-## What's Next
-- Proceeding to Phase 5 (Library & Tracking System) to write the PostgreSQL schema and queries for tracking media and games.
+## 🚀 What's Next
+
+> [!NOTE]
+> - Proceeding to Phase 5 (Library & Tracking System) to write the PostgreSQL schema and queries for tracking media and games.
+
