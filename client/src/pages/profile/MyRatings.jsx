@@ -57,7 +57,7 @@ const MyRatings = () => {
       ) : (
         <div className="row g-4">
           {ratings.map((rating) => (
-            <div key={`${rating.media_type}-${rating.media_id}-${rating.id}`} className="col-12 col-md-6 col-lg-4">
+            <div key={`${rating.media_type}-${rating.db_id}`} className="col-12 col-md-6 col-lg-4">
               <ReviewCard review={rating} />
             </div>
           ))}

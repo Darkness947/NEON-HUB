@@ -149,14 +149,13 @@ const Library = () => {
             const id = activeTab === 'games' ? item.rawg_id : item.tmdb_id;
             const isSelected = selectedItems.includes(id);
             const props = {
-              key: id,
               ...item,
               showDropdown: !isCompareMode,
               selectable: isCompareMode,
               selected: isSelected,
               onSelect: handleSelect
             };
-            return activeTab === 'games' ? <GameCard {...props} /> : <MediaCard {...props} />;
+            return activeTab === 'games' ? <GameCard key={id} {...props} /> : <MediaCard key={id} {...props} />;
           })}
         </div>
       )}

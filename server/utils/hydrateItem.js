@@ -21,13 +21,15 @@ const hydrateItem = async (item, type) => {
       mediaData = await tmdbService.getEpisodeBasic(tId, item.season_number, item.episode_number);
     }
     
-    const { id: dbId, ...itemProps } = item;
-    return { ...mediaData, ...itemProps, db_id: dbId, id: tId || rId, media_type: cleanedType };
+    const actualDbId = item.db_id || item.id;
+    const { id, db_id, ...itemProps } = item;
+    return { ...mediaData, ...itemProps, db_id: actualDbId, id: tId || rId, media_type: cleanedType };
   } catch (error) {
     // If external API fails, return the base item so UI doesn't crash completely
     console.error(`Hydration failed for ${type} ${item.tmdb_id || item.rawg_id || item.media_id}:`, error.message);
-    const { id: dbId, ...itemProps } = item;
-    return { ...itemProps, db_id: dbId, id: item.tmdb_id || item.rawg_id || item.media_id, media_type: cleanedType };
+    const actualDbId = item.db_id || item.id;
+    const { id, db_id, ...itemProps } = item;
+    return { ...itemProps, db_id: actualDbId, id: item.tmdb_id || item.rawg_id || item.media_id, media_type: cleanedType };
   }
 };
 

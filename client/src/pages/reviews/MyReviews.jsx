@@ -83,7 +83,7 @@ const MyReviews = () => {
         <div className="reviews-list">
           {reviews.map(review => (
             <ReviewCard 
-              key={`${review.media_type}-${review.media_id}`} 
+              key={`${review.media_type}-${review.db_id}`} 
               review={review} 
               onDelete={requestDelete} 
             />
