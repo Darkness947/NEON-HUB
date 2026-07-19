@@ -7,6 +7,11 @@ const libraryService = {
     });
     return data.data;
   },
+
+  getLibraryIds: async () => {
+    const { data } = await api.get('/api/library/ids');
+    return data.data;
+  },
   
   getFavorites: async () => {
     const { data } = await api.get('/api/library/favorites');

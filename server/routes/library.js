@@ -21,4 +21,7 @@ router.get('/series/:id/episodes', libraryController.getSeriesEpisodes);
 // Ratings
 router.get('/ratings', libraryController.getRatings);
 
+// Lightweight IDs (no hydration, no pagination)
+router.get('/ids', libraryController.getLibraryIds);
+
 module.exports = router;

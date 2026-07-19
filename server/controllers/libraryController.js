@@ -215,6 +215,17 @@ const getRatings = asyncHandler(async (req, res) => {
   });
 });
 
+// --- ALL IDS (lightweight) ---
+const getLibraryIds = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const ids = await libraryModel.getAllUserIds(userId);
+
+  res.status(200).json({
+    success: true,
+    data: ids
+  });
+});
+
 module.exports = {
   addToLibrary,
   updateLibrary,
@@ -225,5 +236,6 @@ module.exports = {
   updateEpisode,
   deleteEpisode,
   getSeriesEpisodes,
-  getRatings
+  getRatings,
+  getLibraryIds
 };

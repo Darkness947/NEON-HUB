@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLibrary } from '../../hooks/useLibrary';
+import libraryService from '../../services/libraryService';
 import MediaCard from '../../components/media/MediaCard';
 import GameCard from '../../components/media/GameCard';
 import SkeletonCard from '../../components/media/SkeletonCard';
@@ -9,25 +10,61 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 const Library = () => {
-  const { movies, series, games, isLoading } = useLibrary();
+  const { movies: movieIds, series: seriesIds, games: gameIds, isInLibrary, hasIdsError } = useLibrary();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('movies');
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  const getActiveItems = () => {
-    if (activeTab === 'movies') return movies;
-    if (activeTab === 'series') return series;
-    return games;
+  // Page-level fetching with pagination
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const fetchPage = useCallback(async (type, pageNum, append = false) => {
+    try {
+      if (append) {
+        setIsLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
+      const result = await libraryService.getLibrary(type, '', pageNum);
+      if (append) {
+        setItems(prev => [...prev, ...result.items]);
+      } else {
+        setItems(result.items);
+      }
+      setTotal(result.total);
+      setHasMore(result.hasMore);
+      setPage(pageNum);
+    } catch (err) {
+      console.error('Failed to fetch library page:', err);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    setItems([]);
+    setPage(1);
+    setHasMore(false);
+    fetchPage(activeTab, 1);
+  }, [activeTab, fetchPage]);
+
+  const handleLoadMore = () => {
+    fetchPage(activeTab, page + 1, true);
   };
 
-  const items = getActiveItems();
-
+  // Use context ID counts for tab totals (always accurate)
   const tabs = [
-    { key: 'movies', label: t('nav.movies'), count: movies.length },
-    { key: 'series', label: t('nav.series'), count: series.length },
-    { key: 'games', label: t('nav.games'), count: games.length },
+    { key: 'movies', label: t('nav.movies'), count: movieIds.length },
+    { key: 'series', label: t('nav.series'), count: seriesIds.length },
+    { key: 'games', label: t('nav.games'), count: gameIds.length },
   ];
 
   const handleSelect = (id) => {
@@ -74,7 +111,7 @@ const Library = () => {
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap" style={{ gap: '15px' }}>
         <h1 className="section-title m-0">{t('library.title')}</h1>
         <div className="d-flex gap-2">
-          {items.length >= 5 && !isCompareMode && (
+          {total >= 5 && !isCompareMode && (
             <button 
               className="btn btn-primary"
               onClick={handleRecommend}
@@ -91,7 +128,7 @@ const Library = () => {
               {t('library.recommendWithAi', 'Recommend with AI')}
             </button>
           )}
-          {items.length >= 2 && (
+          {total >= 2 && (
             <button 
               className={`btn ${isCompareMode ? 'btn-danger' : 'btn-outline-light'}`}
               onClick={handleToggleCompareMode}
@@ -144,20 +181,52 @@ const Library = () => {
           actionLink={`/discover?tab=${activeTab}`}
         />
       ) : (
-        <div className="media-grid">
-          {items.map(item => {
-            const id = activeTab === 'games' ? item.rawg_id : item.tmdb_id;
-            const isSelected = selectedItems.includes(id);
-            const props = {
-              ...item,
-              showDropdown: !isCompareMode,
-              selectable: isCompareMode,
-              selected: isSelected,
-              onSelect: handleSelect
-            };
-            return activeTab === 'games' ? <GameCard key={id} {...props} /> : <MediaCard key={id} {...props} />;
-          })}
-        </div>
+        <>
+          <div className="media-grid">
+            {items.filter(item => {
+              if (hasIdsError) return true; // Fallback to showing everything if the IDs fetch failed
+              const id = activeTab === 'games' ? item.rawg_id : item.tmdb_id;
+              const type = activeTab === 'movies' ? 'movie' : activeTab === 'series' ? 'series' : 'game';
+              return isInLibrary(type, id);
+            }).map(item => {
+              const id = activeTab === 'games' ? item.rawg_id : item.tmdb_id;
+              const isSelected = selectedItems.includes(id);
+              const props = {
+                ...item,
+                showDropdown: !isCompareMode,
+                selectable: isCompareMode,
+                selected: isSelected,
+                onSelect: handleSelect
+              };
+              return activeTab === 'games' ? <GameCard key={item.db_id} {...props} /> : <MediaCard key={item.db_id} {...props} />;
+            })}
+          </div>
+
+          {hasMore && (
+            <div className="text-center mt-4 mb-3">
+              <button
+                className="btn btn-outline-light"
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                style={{
+                  borderRadius: '20px',
+                  padding: '10px 32px',
+                  fontWeight: 600,
+                  letterSpacing: '0.5px',
+                }}
+              >
+                {isLoadingMore ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Loading...
+                  </>
+                ) : (
+                  `Load More (${items.length} of ${total})`
+                )}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {isCompareMode && (

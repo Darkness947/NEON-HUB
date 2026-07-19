@@ -78,7 +78,7 @@ const getUserMovies = async (userId, status = null, page = 1, limit = 20) => {
     pool.query(
       `SELECT * FROM tracked_movies
        WHERE ${conditions.join(' AND ')}
-       ORDER BY created_at DESC
+       ORDER BY created_at DESC, id DESC
        LIMIT $${i} OFFSET $${i + 1}`,
       values
     ),
@@ -174,7 +174,7 @@ const getUserSeries = async (userId, status = null, page = 1, limit = 20) => {
     pool.query(
       `SELECT * FROM tracked_series
        WHERE ${conditions.join(' AND ')}
-       ORDER BY created_at DESC
+       ORDER BY created_at DESC, id DESC
        LIMIT $${i} OFFSET $${i + 1}`,
       values
     ),
@@ -270,7 +270,7 @@ const getUserGames = async (userId, status = null, page = 1, limit = 20) => {
     pool.query(
       `SELECT * FROM tracked_games
        WHERE ${conditions.join(' AND ')}
-       ORDER BY created_at DESC
+       ORDER BY created_at DESC, id DESC
        LIMIT $${i} OFFSET $${i + 1}`,
       values
     ),
@@ -392,11 +392,36 @@ const getUserRatings = async (userId) => {
   return result.rows;
 };
 
+// --- ALL IDS (lightweight, no pagination) ---
+const getAllUserIds = async (userId) => {
+  const [moviesResult, seriesResult, gamesResult] = await Promise.all([
+    pool.query(
+      'SELECT tmdb_id, status, rating, favorite FROM tracked_movies WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    ),
+    pool.query(
+      'SELECT tmdb_id, status, rating, favorite FROM tracked_series WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    ),
+    pool.query(
+      'SELECT rawg_id, status, rating, favorite FROM tracked_games WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    ),
+  ]);
+
+  return {
+    movies: moviesResult.rows,
+    series: seriesResult.rows,
+    games: gamesResult.rows,
+  };
+};
+
 module.exports = {
   addMovie, updateMovie, removeMovie, getMovieEntry, getUserMovies,
   addSeries, updateSeries, removeSeries, getSeriesEntry, getUserSeries,
   addGame, updateGame, removeGame, getGameEntry, getUserGames,
   getFavorites,
   addEpisode, updateEpisode, removeEpisode, getEpisodeEntry, getSeriesEpisodes,
-  getUserRatings
+  getUserRatings,
+  getAllUserIds
 };

@@ -9,6 +9,7 @@ const ReviewCard = ({ review, onDelete }) => {
       case 'movie': return `/movies/${review.media_id}`;
       case 'series': return `/series/${review.media_id}`;
       case 'game': return `/games/${review.media_id}`;
+      case 'episode': return `/series/${review.media_id}`;
       default: return '#';
     }
   };

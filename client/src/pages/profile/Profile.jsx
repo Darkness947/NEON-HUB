@@ -44,7 +44,10 @@ const Profile = () => {
           const allActivityMap = new Map();
           
           [...reviewsRes, ...ratingsRes].forEach(item => {
-            const key = `${item.media_type}-${item.media_id}`;
+            // For episodes, include season/episode in key to avoid collapsing different episodes
+            const key = item.media_type === 'episode'
+              ? `episode-${item.media_id}-S${item.season_number}E${item.episode_number}`
+              : `${item.media_type}-${item.media_id}`;
             if (!allActivityMap.has(key)) {
               allActivityMap.set(key, item);
             } else {
@@ -157,7 +160,7 @@ const Profile = () => {
             <div className="d-flex flex-column gap-3">
               {recentReviews.map(review => (
                 <ReviewCard 
-                  key={`${review.media_type}-${review.media_id}`} 
+                  key={`${review.media_type}-${review.db_id}`} 
                   review={review} 
                   onDelete={null} // Read only in public profile
                 />
