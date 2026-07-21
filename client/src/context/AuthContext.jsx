@@ -1,20 +1,36 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import authService from '../services/authService';
-import FullPageLoader from '../components/common/Loader';
 
 const AuthContext = createContext(null);
+
+// Retry helper with exponential backoff (2s, 4s, 8s)
+const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 2000) => {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const isLastAttempt = attempt === maxRetries;
+      // Don't retry on auth errors (401/403) — only on network/timeout errors
+      const isAuthError = err?.response?.status >= 400 && err?.response?.status < 500;
+      if (isLastAttempt || isAuthError) throw err;
+
+      const delay = baseDelay * Math.pow(2, attempt);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // On mount: attempt silent token refresh to restore session
+  // On mount: attempt silent token refresh to restore session (with retry)
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const { accessToken, user: userData } = await authService.refreshToken();
-        window.__accessToken = accessToken;
-        setUser(userData);
+        const result = await retryWithBackoff(() => authService.refreshToken());
+        window.__accessToken = result.accessToken;
+        setUser(result.user);
       } catch {
         // No active session — stay logged out
         window.__accessToken = null;
@@ -49,9 +65,8 @@ export const AuthProvider = ({ children }) => {
     setUser(updatedUser);
   };
 
-  // Block render until we know if there's an active session
-  if (isLoading) return <FullPageLoader />;
-
+  // NON-BLOCKING: render children immediately while auth resolves in background.
+  // Protected routes will show their own loader via ProtectedRoute.
   return (
     <AuthContext.Provider
       value={{

@@ -44,26 +44,38 @@ const updatePassword = async (userId, hashedPassword) => {
   return result.rows[0] || null;
 };
 
-// ─── Refresh Token Functions ──────────────────────────────────────────────────
+// ─── Refresh Token Functions (Selector:Secret Pattern) ────────────────────────
 
-const createRefreshToken = async (userId, tokenHash, expiresAt) => {
+// Creates a new refresh token row and returns the full row (including UUID id as selector)
+const createRefreshToken = async (userId, secretHash, expiresAt, absoluteExpiresAt) => {
   const result = await pool.query(
-    `INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
-     VALUES ($1, $2, $3)
-     RETURNING id`,
-    [userId, tokenHash, expiresAt]
+    `INSERT INTO refresh_tokens (user_id, secret_hash, expires_at, absolute_expires_at)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, user_id, expires_at, absolute_expires_at`,
+    [userId, secretHash, expiresAt, absoluteExpiresAt]
   );
   return result.rows[0];
 };
 
-const findRefreshTokensByUser = async (userId) => {
+// O(1) lookup by selector (UUID primary key) — no scanning
+const findRefreshTokenById = async (selector) => {
   const result = await pool.query(
-    'SELECT id, token_hash, expires_at FROM refresh_tokens WHERE user_id = $1 AND expires_at > NOW()',
-    [userId]
+    `SELECT id, user_id, secret_hash, expires_at, absolute_expires_at, rotated_at
+     FROM refresh_tokens WHERE id = $1`,
+    [selector]
   );
-  return result.rows;
+  return result.rows[0] || null;
 };
 
+// Grace period: mark as rotated instead of deleting
+const markRefreshTokenRotated = async (selector) => {
+  await pool.query(
+    'UPDATE refresh_tokens SET rotated_at = NOW() WHERE id = $1',
+    [selector]
+  );
+};
+
+// Direct delete by selector (for logout)
 const deleteRefreshToken = async (id) => {
   await pool.query('DELETE FROM refresh_tokens WHERE id = $1', [id]);
 };
@@ -71,6 +83,8 @@ const deleteRefreshToken = async (id) => {
 const deleteAllRefreshTokensForUser = async (userId) => {
   await pool.query('DELETE FROM refresh_tokens WHERE user_id = $1', [userId]);
 };
+
+// ─── User Profile Functions ───────────────────────────────────────────────────
 
 const updateBio = async (userId, bio) => {
   const result = await pool.query(
@@ -84,6 +98,16 @@ const deleteUser = async (userId) => {
   await pool.query('DELETE FROM users WHERE id = $1', [userId]);
 };
 
+// Cleanup: remove expired tokens and rotated tokens older than 30 seconds
+const cleanupStaleTokens = async () => {
+  await pool.query(
+    `DELETE FROM refresh_tokens
+     WHERE expires_at < NOW()
+        OR absolute_expires_at < NOW()
+        OR (rotated_at IS NOT NULL AND rotated_at < NOW() - INTERVAL '30 seconds')`
+  );
+};
+
 module.exports = {
   createUser,
   findUserByEmail,
@@ -93,7 +117,9 @@ module.exports = {
   updatePassword,
   deleteUser,
   createRefreshToken,
-  findRefreshTokensByUser,
+  findRefreshTokenById,
+  markRefreshTokenRotated,
   deleteRefreshToken,
   deleteAllRefreshTokensForUser,
+  cleanupStaleTokens,
 };

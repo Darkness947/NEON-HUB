@@ -32,15 +32,20 @@ import TermsOfService from '../pages/TermsOfService';
 import AiRecommendations from '../pages/ai/AiRecommendations';
 import AiComparison from '../pages/ai/AiComparison';
 
+import FullPageLoader from '../components/common/Loader';
+
 // ─── Protected Route Wrapper ──────────────────────────────────────────────────
+// Shows loader ONLY for protected pages while auth is resolving
 const ProtectedRoute = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <FullPageLoader />;
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 // ─── Guest Only Route (redirect to dashboard if already logged in) ────────────
 const GuestRoute = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <FullPageLoader />;
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Outlet />;
 };
 

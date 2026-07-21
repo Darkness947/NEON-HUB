@@ -5,7 +5,7 @@ import defaultAvatar from '../../assets/images/default_avatar.png';
 import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,7 +123,10 @@ const Navbar = () => {
               </Link>
             </li>
 
-            {isAuthenticated ? (
+            {isLoading ? (
+              // Prevent buttons from flashing while auth is resolving
+              <li className="nav-item ms-2" style={{ width: '120px' }}></li>
+            ) : isAuthenticated ? (
               <>
                 <li className="nav-item">
                   <Link className="nav-link" to="/dashboard" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-ui)', fontWeight: 600, letterSpacing: '0.5px' }}>

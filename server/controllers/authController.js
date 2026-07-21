@@ -15,26 +15,32 @@ const issueAccessToken = (userId) =>
     { expiresIn: process.env.JWT_EXPIRES_IN || '24h', algorithm: 'HS256' }
   );
 
-const issueRefreshToken = async (userId, res) => {
-  // Generate opaque token
-  const rawToken = crypto.randomBytes(32).toString('hex');
+const issueRefreshToken = async (userId, res, absoluteExpiresAt = null) => {
+  // Generate the secret part (random 32 bytes)
+  const secret = crypto.randomBytes(32).toString('hex');
 
-  // Hash before storing in DB
-  const tokenHash = await bcrypt.hash(rawToken, 10);
+  // Hash the secret before storing in DB
+  const secretHash = await bcrypt.hash(secret, 10);
 
-  // Calculate expiry
-  const expiresInDays = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN) || 7;
-  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+  // Rolling expiry: 7 days of inactivity
+  const rollingDays = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN) || 7;
+  const expiresAt = new Date(Date.now() + rollingDays * 24 * 60 * 60 * 1000);
 
-  // Store hashed token in DB
-  await userModel.createRefreshToken(userId, tokenHash, expiresAt);
+  // Absolute expiry: 30 days from login (set once, never extended)
+  const absoluteDays = parseInt(process.env.ABSOLUTE_SESSION_DAYS) || 30;
+  const absExpiry = absoluteExpiresAt || new Date(Date.now() + absoluteDays * 24 * 60 * 60 * 1000);
 
-  // Send raw token in httpOnly cookie
-  res.cookie('refreshToken', rawToken, {
+  // Store in DB — returns the row including UUID id (the selector)
+  const row = await userModel.createRefreshToken(userId, secretHash, expiresAt, absExpiry);
+
+  // Cookie value = selector.secret
+  const cookieValue = `${row.id}.${secret}`;
+
+  res.cookie('refreshToken', cookieValue, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: expiresInDays * 24 * 60 * 60 * 1000,
+    maxAge: rollingDays * 24 * 60 * 60 * 1000,
     path: '/',
   });
 };
@@ -119,45 +125,75 @@ const login = asyncHandler(async (req, res) => {
 // ─── Refresh Token ────────────────────────────────────────────────────────────
 
 const refresh = asyncHandler(async (req, res) => {
-  const rawToken = req.cookies?.refreshToken;
+  const cookieValue = req.cookies?.refreshToken;
 
-  if (!rawToken) {
+  if (!cookieValue) {
     throw new AppError('No refresh token provided', 401, 'NO_REFRESH_TOKEN');
   }
 
-  // We need to find which user this token belongs to by checking all non-expired tokens
-  // Since we hash tokens, we can't do a direct DB lookup — we iterate and compare
-  // This is intentional: hashed tokens prevent DB breach from exposing raw tokens
-  const pool = require('../config/db');
-  const { rows: allTokens } = await pool.query(
-    'SELECT rt.id, rt.user_id, rt.token_hash, rt.expires_at FROM refresh_tokens rt WHERE rt.expires_at > NOW()'
-  );
-
-  let matchedToken = null;
-  for (const tokenRow of allTokens) {
-    const isMatch = await bcrypt.compare(rawToken, tokenRow.token_hash);
-    if (isMatch) {
-      matchedToken = tokenRow;
-      break;
-    }
+  // Parse selector.secret from cookie
+  const dotIndex = cookieValue.indexOf('.');
+  if (dotIndex === -1) {
+    throw new AppError('Invalid refresh token format', 401, 'INVALID_REFRESH_TOKEN');
   }
 
-  if (!matchedToken) {
+  const selector = cookieValue.substring(0, dotIndex);
+  const secret = cookieValue.substring(dotIndex + 1);
+
+  // O(1) lookup by selector (UUID primary key)
+  const tokenRow = await userModel.findRefreshTokenById(selector);
+
+  if (!tokenRow) {
     throw new AppError('Invalid or expired refresh token', 401, 'INVALID_REFRESH_TOKEN');
   }
 
+  // Check rolling expiry (7 days of inactivity)
+  if (new Date(tokenRow.expires_at) < new Date()) {
+    await userModel.deleteRefreshToken(tokenRow.id);
+    throw new AppError('Refresh token expired', 401, 'REFRESH_TOKEN_EXPIRED');
+  }
+
+  // Check absolute expiry (30 days since login — never extends)
+  if (new Date(tokenRow.absolute_expires_at) < new Date()) {
+    await userModel.deleteRefreshToken(tokenRow.id);
+    throw new AppError('Session expired — please log in again', 401, 'ABSOLUTE_SESSION_EXPIRED');
+  }
+
+  // Check grace period: if token was already rotated, only accept within 30s window
+  if (tokenRow.rotated_at) {
+    const rotatedTime = new Date(tokenRow.rotated_at).getTime();
+    const gracePeriodMs = 30 * 1000; // 30 seconds
+    if (Date.now() - rotatedTime > gracePeriodMs) {
+      // Grace period expired — this is a stale or replayed token
+      await userModel.deleteRefreshToken(tokenRow.id);
+      throw new AppError('Refresh token already used', 401, 'REFRESH_TOKEN_REUSED');
+    }
+    // Within grace period — allow it but don't rotate again
+  }
+
+  // Single bcrypt comparison: verify the secret
+  const isValid = await bcrypt.compare(secret, tokenRow.secret_hash);
+  if (!isValid) {
+    throw new AppError('Invalid refresh token', 401, 'INVALID_REFRESH_TOKEN');
+  }
+
   // Get user
-  const user = await userModel.findUserById(matchedToken.user_id);
+  const user = await userModel.findUserById(tokenRow.user_id);
   if (!user) {
     throw new AppError('User not found', 404, 'USER_NOT_FOUND');
   }
 
-  // Delete the old token (rotation)
-  await userModel.deleteRefreshToken(matchedToken.id);
+  // Rotate: mark old token as rotated (grace period) instead of deleting
+  if (!tokenRow.rotated_at) {
+    await userModel.markRefreshTokenRotated(tokenRow.id);
+  }
 
-  // Issue new tokens
+  // Issue new tokens — carry over the original absolute_expires_at
   const accessToken = issueAccessToken(user.id);
-  await issueRefreshToken(user.id, res);
+  await issueRefreshToken(user.id, res, tokenRow.absolute_expires_at);
+
+  // Cleanup stale tokens in the background (fire-and-forget)
+  userModel.cleanupStaleTokens().catch(() => {});
 
   res.status(200).json({
     success: true,
@@ -171,22 +207,14 @@ const refresh = asyncHandler(async (req, res) => {
 // ─── Logout ───────────────────────────────────────────────────────────────────
 
 const logout = asyncHandler(async (req, res) => {
-  const rawToken = req.cookies?.refreshToken;
+  const cookieValue = req.cookies?.refreshToken;
 
-  if (rawToken) {
-    // Find and delete the matching token
-    const pool = require('../config/db');
-    const { rows: userTokens } = await pool.query(
-      'SELECT id, token_hash FROM refresh_tokens WHERE user_id = $1',
-      [req.user.id]
-    );
-
-    for (const tokenRow of userTokens) {
-      const isMatch = await bcrypt.compare(rawToken, tokenRow.token_hash);
-      if (isMatch) {
-        await userModel.deleteRefreshToken(tokenRow.id);
-        break;
-      }
+  if (cookieValue) {
+    // Parse selector from cookie and delete directly — no bcrypt needed
+    const dotIndex = cookieValue.indexOf('.');
+    if (dotIndex !== -1) {
+      const selector = cookieValue.substring(0, dotIndex);
+      await userModel.deleteRefreshToken(selector);
     }
   }
 

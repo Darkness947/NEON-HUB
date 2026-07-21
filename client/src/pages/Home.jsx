@@ -25,44 +25,38 @@ const Home = () => {
     let cancelled = false;
 
     const loadData = async () => {
-      try {
-        const movies = await mediaService.fetchTrendingMovies();
-        if (!cancelled) {
-          setTrendingMovies(movies);
-          setIsLoadingMovies(false);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setIsLoadingMovies(false);
-          setError(err.message || 'Failed to load media');
-        }
-      }
+      // Fire all three requests in parallel instead of sequentially
+      const [moviesResult, seriesResult, gamesResult] = await Promise.allSettled([
+        mediaService.fetchTrendingMovies(),
+        mediaService.fetchTrendingSeries(),
+        mediaService.fetchTrendingGames(),
+      ]);
 
-      try {
-        const series = await mediaService.fetchTrendingSeries();
-        if (!cancelled) {
-          setPopularSeries(series);
-          setIsLoadingSeries(false);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setIsLoadingSeries(false);
-          setError(err.message || 'Failed to load media');
-        }
-      }
+      if (cancelled) return;
 
-      try {
-        const games = await mediaService.fetchTrendingGames();
-        if (!cancelled) {
-          setTrendingGames(games);
-          setIsLoadingGames(false);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setIsLoadingGames(false);
-          setError(err.message || 'Failed to load media');
-        }
+      // Movies
+      if (moviesResult.status === 'fulfilled') {
+        setTrendingMovies(moviesResult.value);
+      } else {
+        setError(moviesResult.reason?.message || 'Failed to load movies');
       }
+      setIsLoadingMovies(false);
+
+      // Series
+      if (seriesResult.status === 'fulfilled') {
+        setPopularSeries(seriesResult.value);
+      } else {
+        setError(seriesResult.reason?.message || 'Failed to load series');
+      }
+      setIsLoadingSeries(false);
+
+      // Games
+      if (gamesResult.status === 'fulfilled') {
+        setTrendingGames(gamesResult.value);
+      } else {
+        setError(gamesResult.reason?.message || 'Failed to load games');
+      }
+      setIsLoadingGames(false);
     };
 
     loadData();
