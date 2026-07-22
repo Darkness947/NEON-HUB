@@ -36,10 +36,13 @@ const issueRefreshToken = async (userId, res, absoluteExpiresAt = null) => {
   // Cookie value = selector.secret
   const cookieValue = `${row.id}.${secret}`;
 
+  // Robust check for production / cross-site environments
+  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod' || (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
+
   res.cookie('refreshToken', cookieValue, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: rollingDays * 24 * 60 * 60 * 1000,
     path: '/',
   });
@@ -218,11 +221,13 @@ const logout = asyncHandler(async (req, res) => {
     }
   }
 
+  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod' || (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
+
   // Clear the cookie
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     path: '/',
   });
 
@@ -388,10 +393,12 @@ const updateBio = asyncHandler(async (req, res) => {
 const deleteAccount = asyncHandler(async (req, res) => {
   await userModel.deleteUser(req.user.id);
 
+  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod' || (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
+
   res.cookie('refreshToken', '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     expires: new Date(0),
     path: '/',
   });
