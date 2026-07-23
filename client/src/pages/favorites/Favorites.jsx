@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLibrary } from '../../hooks/useLibrary';
+import libraryService from '../../services/libraryService';
 import MediaCard from '../../components/media/MediaCard';
 import GameCard from '../../components/media/GameCard';
 import SkeletonCard from '../../components/media/SkeletonCard';
@@ -8,16 +9,41 @@ import { useTranslation } from 'react-i18next';
 
 const Favorites = () => {
   const { t } = useTranslation();
-  const { movies, series, games, isLoading } = useLibrary();
+  const { movies, series, games, isLoading: isLibraryLoading } = useLibrary();
   const [activeTab, setActiveTab] = useState('all');
+  const [hydratedItems, setHydratedItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchFavs = async () => {
+      try {
+        setIsLoading(true);
+        const data = await libraryService.getFavorites();
+        if (!cancelled) setHydratedItems(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    fetchFavs();
+    return () => { cancelled = true; };
+  }, []);
 
   const favorites = useMemo(() => {
+    // Filter hydrated items to only show those STILL marked as favorite in the global context
+    // This gives us instant UI updates when un-favoriting a card
+    const activeMovies = new Set(movies.filter(m => m.favorite).map(m => m.tmdb_id));
+    const activeSeries = new Set(series.filter(s => s.favorite).map(s => s.tmdb_id));
+    const activeGames = new Set(games.filter(g => g.favorite).map(g => g.rawg_id));
+
     return {
-      movies: movies.filter(m => m.favorite),
-      series: series.filter(s => s.favorite),
-      games: games.filter(g => g.favorite)
+      movies: hydratedItems.filter(item => item.media_type === 'movie' && activeMovies.has(item.id || item.tmdb_id)),
+      series: hydratedItems.filter(item => item.media_type === 'series' && activeSeries.has(item.id || item.tmdb_id)),
+      games: hydratedItems.filter(item => item.media_type === 'game' && activeGames.has(item.id || item.rawg_id))
     };
-  }, [movies, series, games]);
+  }, [hydratedItems, movies, series, games]);
 
   const getActiveItems = () => {
     if (activeTab === 'movies') return favorites.movies;
