@@ -24,39 +24,49 @@ const Home = () => {
   useEffect(() => {
     let cancelled = false;
 
-    const loadData = async () => {
-      // Fire all three requests in parallel instead of sequentially
-      const [moviesResult, seriesResult, gamesResult] = await Promise.allSettled([
-        mediaService.fetchTrendingMovies(),
-        mediaService.fetchTrendingSeries(),
-        mediaService.fetchTrendingGames(),
-      ]);
+    const loadData = () => {
+      // Fetch independently so slow APIs don't block fast ones
+      mediaService.fetchTrendingMovies()
+        .then(data => {
+          if (!cancelled) {
+            setTrendingMovies(data);
+            setIsLoadingMovies(false);
+          }
+        })
+        .catch(err => {
+          if (!cancelled) {
+            setError(err.message || 'Failed to load movies');
+            setIsLoadingMovies(false);
+          }
+        });
 
-      if (cancelled) return;
+      mediaService.fetchTrendingSeries()
+        .then(data => {
+          if (!cancelled) {
+            setPopularSeries(data);
+            setIsLoadingSeries(false);
+          }
+        })
+        .catch(err => {
+          if (!cancelled) {
+            setError(err.message || 'Failed to load series');
+            setIsLoadingSeries(false);
+          }
+        });
 
-      // Movies
-      if (moviesResult.status === 'fulfilled') {
-        setTrendingMovies(moviesResult.value);
-      } else {
-        setError(moviesResult.reason?.message || 'Failed to load movies');
-      }
-      setIsLoadingMovies(false);
-
-      // Series
-      if (seriesResult.status === 'fulfilled') {
-        setPopularSeries(seriesResult.value);
-      } else {
-        setError(seriesResult.reason?.message || 'Failed to load series');
-      }
-      setIsLoadingSeries(false);
-
-      // Games
-      if (gamesResult.status === 'fulfilled') {
-        setTrendingGames(gamesResult.value);
-      } else {
-        setError(gamesResult.reason?.message || 'Failed to load games');
-      }
-      setIsLoadingGames(false);
+      mediaService.fetchTrendingGames()
+        .then(data => {
+          if (!cancelled) {
+            setTrendingGames(data);
+            setIsLoadingGames(false);
+          }
+        })
+        .catch(err => {
+          if (!cancelled) {
+            setError(err.message || 'Failed to load games');
+            setIsLoadingGames(false);
+          }
+        });
     };
 
     loadData();
@@ -67,16 +77,27 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if (trendingMovies.length > 0 && popularSeries.length > 0 && trendingGames.length > 0) {
+    const availableItems = [];
+    
+    if (trendingMovies.length > 0) {
       const randomMovie = trendingMovies[Math.floor(Math.random() * Math.min(trendingMovies.length, 10))];
+      availableItems.push({ ...randomMovie, type: 'movie' });
+    }
+    
+    if (popularSeries.length > 0) {
       const randomSeries = popularSeries[Math.floor(Math.random() * Math.min(popularSeries.length, 10))];
+      availableItems.push({ ...randomSeries, type: 'series' });
+    }
+    
+    if (trendingGames.length > 0) {
       const randomGame = trendingGames[Math.floor(Math.random() * Math.min(trendingGames.length, 10))];
-      setFeaturedItems([
-        { ...randomMovie, type: 'movie' },
-        { ...randomSeries, type: 'series' },
-        { ...randomGame, type: 'game' }
-      ]);
-      setCurrentHeroIndex(Math.floor(Math.random() * 3));
+      availableItems.push({ ...randomGame, type: 'game' });
+    }
+
+    if (availableItems.length > 0) {
+      setFeaturedItems(availableItems);
+      // Only randomize the index on initial load or when available items change significantly
+      setCurrentHeroIndex(Math.floor(Math.random() * availableItems.length));
     }
   }, [trendingMovies, popularSeries, trendingGames]);
 
@@ -102,7 +123,7 @@ const Home = () => {
     <div className="page-container fade-in">
       {error && (
         <div className="alert alert-danger mb-4">
-          Error loading media: {error}. Please ensure your API keys are correct and the backend is running.
+          Error loading media: {error}. Please try again later.
         </div>
       )}
 
