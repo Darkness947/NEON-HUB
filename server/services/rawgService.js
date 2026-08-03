@@ -42,7 +42,7 @@ const rawgService = {
 
     const { data } = await rawgApi.get('/games', {
       params: {
-        ordering: '-rating',
+        ordering: '-added',
         page_size: 20,
         page,
       },
