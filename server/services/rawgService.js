@@ -34,23 +34,29 @@ const cleanGameDetail = (g, screenshots = []) => ({
   screenshots: screenshots,
 });
 
+const AppError = require('../utils/AppError');
+
 const rawgService = {
   getTrendingGames: async (page = 1) => {
     const cacheKey = `trending_games_page_${page}`;
     const cached = cache.get(cacheKey);
     if (cached) return cached;
 
-    const { data } = await rawgApi.get('/games', {
-      params: {
-        ordering: '-added',
-        page_size: 20,
-        page,
-      },
-    });
+    try {
+      const { data } = await rawgApi.get('/games', {
+        params: {
+          ordering: '-added',
+          page_size: 20,
+          page,
+        },
+      });
 
-    const cleaned = data.results.map(cleanGame);
-    cache.set(cacheKey, cleaned, 600); // Cache for 10 minutes
-    return cleaned;
+      const cleaned = data.results.map(cleanGame);
+      cache.set(cacheKey, cleaned, 600); // Cache for 10 minutes
+      return cleaned;
+    } catch (err) {
+      throw new AppError('Games service is temporarily unavailable.', 503, 'GAMES_UNAVAILABLE');
+    }
   },
 
   searchGames: async (query, page = 1) => {
