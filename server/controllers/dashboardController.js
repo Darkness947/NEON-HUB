@@ -2,6 +2,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const dashboardModel = require('../models/dashboardModel');
 const activityModel = require('../models/activityModel');
 const hydrateItem = require('../utils/hydrateItem');
+const libraryModel = require('../models/libraryModel');
 const AppError = require('../utils/AppError');
 
 const getStats = asyncHandler(async (req, res) => {
@@ -29,10 +30,23 @@ const getActivity = asyncHandler(async (req, res) => {
   
   const hydratedActivity = await Promise.all(
     activity.map(async (log) => {
+      let igdb_id = undefined;
+      let rawg_id = undefined;
+
+      if (log.media_type === 'game') {
+        const dbItem = await libraryModel.getGameByAnyId(log.media_id);
+        if (dbItem) {
+          igdb_id = dbItem.igdb_id;
+          rawg_id = dbItem.rawg_id;
+        }
+      }
+
       const mockItem = {
         id: log.id,
         media_id: log.media_id,
         media_type: log.media_type,
+        igdb_id,
+        rawg_id,
         ...(log.meta?.season_number !== undefined && { season_number: log.meta.season_number }),
         ...(log.meta?.episode_number !== undefined && { episode_number: log.meta.episode_number })
       };

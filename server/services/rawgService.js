@@ -6,7 +6,7 @@ const RAWG_API_KEY = process.env.RAWG_API_KEY;
 
 const rawgApi = axios.create({
   baseURL: RAWG_BASE_URL,
-  timeout: 20000,
+  timeout: 3000, // Reduced to fail fast since the API is down
   params: {
     key: RAWG_API_KEY,
   },

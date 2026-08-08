@@ -42,7 +42,21 @@ const GameDetail = () => {
       try {
         setIsLoading(true);
         const data = await mediaService.getGameById(id);
-        if (!cancelled) setGame(data);
+        if (!cancelled) {
+          if (data.provider === 'igdb') {
+            // Adapt IGDB format to look like the format the UI expects
+            setGame({
+              ...data,
+              title: data.name,
+              description: data.summary,
+              poster_url: data.cover_url_hd || data.cover_url,
+              vote_average: data.rating,
+              screenshots: data.screenshots?.map(s => s.full || s.thumbnail) || [],
+            });
+          } else {
+            setGame(data);
+          }
+        }
         
         try {
           const revData = await reviewService.getMediaReviews('game', id);
@@ -106,7 +120,7 @@ const GameDetail = () => {
   return (
     <div className="fade-in">
       <Helmet>
-        <title>{game.title} - NEON HUB</title>
+        <title>{game.title || 'Game Details'} - NEON HUB</title>
         <meta name="description" content={game.description?.replace(/<[^>]*>?/gm, '').substring(0, 150)} />
         <meta property="og:title" content={`${game.title} - NEON HUB`} />
         <meta property="og:description" content={game.description?.replace(/<[^>]*>?/gm, '').substring(0, 150)} />

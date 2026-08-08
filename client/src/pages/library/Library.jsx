@@ -185,11 +185,11 @@ const Library = () => {
           <div className="media-grid">
             {items.filter(item => {
               if (hasIdsError) return true; // Fallback to showing everything if the IDs fetch failed
-              const id = activeTab === 'games' ? item.rawg_id : item.tmdb_id;
+              const id = activeTab === 'games' ? (item.igdb_id || item.rawg_id || item.id) : (item.tmdb_id || item.id);
               const type = activeTab === 'movies' ? 'movie' : activeTab === 'series' ? 'series' : 'game';
               return isInLibrary(type, id);
             }).map(item => {
-              const id = activeTab === 'games' ? item.rawg_id : item.tmdb_id;
+              const id = activeTab === 'games' ? (item.igdb_id || item.rawg_id || item.id) : (item.tmdb_id || item.id);
               const isSelected = selectedItems.includes(id);
               const props = {
                 ...item,

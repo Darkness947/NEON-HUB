@@ -31,11 +31,11 @@ const getStats = async (userId) => {
 const getRecentTrackedItems = async (userId, limit = 50) => {
   const result = await pool.query(
     `SELECT * FROM (
-      SELECT id as db_id, user_id, tmdb_id as media_id, 'movie' as media_type, status, rating, favorite, created_at FROM tracked_movies WHERE user_id = $1
+      SELECT id as db_id, user_id, tmdb_id as media_id, NULL::integer as igdb_id, NULL::integer as rawg_id, 'movie' as media_type, status, rating, favorite, created_at FROM tracked_movies WHERE user_id = $1
       UNION ALL
-      SELECT id as db_id, user_id, tmdb_id as media_id, 'series' as media_type, status, rating, favorite, created_at FROM tracked_series WHERE user_id = $1
+      SELECT id as db_id, user_id, tmdb_id as media_id, NULL::integer as igdb_id, NULL::integer as rawg_id, 'series' as media_type, status, rating, favorite, created_at FROM tracked_series WHERE user_id = $1
       UNION ALL
-      SELECT id as db_id, user_id, rawg_id as media_id, 'game' as media_type, status, rating, favorite, created_at FROM tracked_games WHERE user_id = $1
+      SELECT id as db_id, user_id, COALESCE(igdb_id, rawg_id) as media_id, igdb_id, rawg_id, 'game' as media_type, status, rating, favorite, created_at FROM tracked_games WHERE user_id = $1
     ) AS combined
     ORDER BY created_at DESC
     LIMIT $2`,

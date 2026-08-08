@@ -1,5 +1,7 @@
 const pool = require('../config/db');
 
+const getGamesIdColumn = () => process.env.GAMES_PROVIDER === 'rawg' ? 'rawg_id' : 'igdb_id';
+
 // --- MOVIES ---
 
 const addMovie = async (userId, tmdbId, status) => {
@@ -194,17 +196,18 @@ const getUserSeries = async (userId, status = null, page = 1, limit = 20) => {
 
 // --- GAMES ---
 
-const addGame = async (userId, rawgId, status) => {
+const addGame = async (userId, gameId, status) => {
+  const col = getGamesIdColumn();
   const result = await pool.query(
-    `INSERT INTO tracked_games (user_id, rawg_id, status)
+    `INSERT INTO tracked_games (user_id, ${col}, status)
      VALUES ($1, $2, $3)
      RETURNING *`,
-    [userId, rawgId, status]
+    [userId, gameId, status]
   );
   return result.rows[0];
 };
 
-const updateGame = async (userId, rawgId, fields) => {
+const updateGame = async (userId, gameId, fields) => {
   const allowed = ['status', 'rating', 'review', 'favorite', 'hours_played'];
   const updates = [];
   const values = [];
@@ -222,39 +225,54 @@ const updateGame = async (userId, rawgId, fields) => {
 
   updates.push('updated_at = NOW()');
 
-  values.push(userId, rawgId);
+  values.push(userId, gameId);
+  const col = getGamesIdColumn();
   const result = await pool.query(
     `UPDATE tracked_games
      SET ${updates.join(', ')}
-     WHERE user_id = $${i} AND rawg_id = $${i + 1}
+     WHERE user_id = $${i} AND ${col} = $${i + 1}
      RETURNING *`,
     values
   );
   return result.rows[0] || null;
 };
 
-const removeGame = async (userId, rawgId) => {
+const removeGame = async (userId, gameId) => {
+  const col = getGamesIdColumn();
   const result = await pool.query(
     `DELETE FROM tracked_games
-     WHERE user_id = $1 AND rawg_id = $2
+     WHERE user_id = $1 AND ${col} = $2
      RETURNING *`,
-    [userId, rawgId]
+    [userId, gameId]
   );
   return result.rows[0] || null;
 };
 
-const getGameEntry = async (userId, rawgId) => {
+const getGameEntry = async (userId, gameId) => {
+  const col = getGamesIdColumn();
   const result = await pool.query(
     `SELECT * FROM tracked_games
-     WHERE user_id = $1 AND rawg_id = $2`,
-    [userId, rawgId]
+     WHERE user_id = $1 AND ${col} = $2`,
+    [userId, gameId]
+  );
+  return result.rows[0] || null;
+};
+
+const getGameByAnyId = async (mediaId) => {
+  const result = await pool.query(
+    `SELECT * FROM tracked_games
+     WHERE igdb_id = $1 OR rawg_id = $1
+     LIMIT 1`,
+    [mediaId]
   );
   return result.rows[0] || null;
 };
 
 const getUserGames = async (userId, status = null, page = 1, limit = 20) => {
   const offset = (page - 1) * limit;
-  const conditions = ['user_id = $1'];
+  const col = getGamesIdColumn();
+  // Strictly filter by igdb_id to hide RAWG games while RAWG is down
+  const conditions = ['user_id = $1', `${col} IS NOT NULL`];
   const values = [userId];
   let i = 2;
 
@@ -291,15 +309,16 @@ const getUserGames = async (userId, status = null, page = 1, limit = 20) => {
 
 // --- FAVORITES ---
 const getFavorites = async (userId) => {
+  const col = getGamesIdColumn();
   const result = await pool.query(
-    `SELECT id, tmdb_id as media_id, status, rating, 'movie' as media_type, created_at 
+    `SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, status, rating, 'movie' as media_type, created_at 
      FROM tracked_movies WHERE user_id = $1 AND favorite = true
      UNION ALL
-     SELECT id, tmdb_id as media_id, status, rating, 'series' as media_type, created_at 
+     SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, status, rating, 'series' as media_type, created_at 
      FROM tracked_series WHERE user_id = $1 AND favorite = true
      UNION ALL
-     SELECT id, rawg_id as media_id, status, rating, 'game' as media_type, created_at 
-     FROM tracked_games WHERE user_id = $1 AND favorite = true
+     SELECT id, COALESCE(igdb_id, rawg_id) as media_id, rawg_id, igdb_id, status, rating, 'game' as media_type, created_at 
+     FROM tracked_games WHERE user_id = $1 AND favorite = true AND igdb_id IS NOT NULL
      ORDER BY created_at DESC`,
     [userId]
   );
@@ -374,17 +393,18 @@ const getSeriesEpisodes = async (userId, tmdbId) => {
 
 // --- RATINGS ---
 const getUserRatings = async (userId) => {
+  const col = getGamesIdColumn();
   const result = await pool.query(
-    `SELECT id, tmdb_id as media_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'movie' as media_type, updated_at as created_at 
+    `SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'movie' as media_type, updated_at as created_at 
      FROM tracked_movies WHERE user_id = $1 AND rating IS NOT NULL
      UNION ALL
-     SELECT id, tmdb_id as media_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'series' as media_type, updated_at as created_at 
+     SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'series' as media_type, updated_at as created_at 
      FROM tracked_series WHERE user_id = $1 AND rating IS NOT NULL
      UNION ALL
-     SELECT id, rawg_id as media_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'game' as media_type, updated_at as created_at 
-     FROM tracked_games WHERE user_id = $1 AND rating IS NOT NULL
+     SELECT id, COALESCE(igdb_id, rawg_id) as media_id, rawg_id, igdb_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'game' as media_type, updated_at as created_at 
+     FROM tracked_games WHERE user_id = $1 AND rating IS NOT NULL AND igdb_id IS NOT NULL
      UNION ALL
-     SELECT id, tmdb_id as media_id, season_number, episode_number, status, rating, review, 'episode' as media_type, created_at 
+     SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, season_number, episode_number, status, rating, review, 'episode' as media_type, created_at 
      FROM tracked_episodes WHERE user_id = $1 AND rating IS NOT NULL
      ORDER BY created_at DESC`,
     [userId]
@@ -394,6 +414,7 @@ const getUserRatings = async (userId) => {
 
 // --- ALL IDS (lightweight, no pagination) ---
 const getAllUserIds = async (userId) => {
+  const col = getGamesIdColumn();
   const [moviesResult, seriesResult, gamesResult] = await Promise.all([
     pool.query(
       'SELECT tmdb_id, status, rating, favorite FROM tracked_movies WHERE user_id = $1 ORDER BY created_at DESC',
@@ -404,7 +425,7 @@ const getAllUserIds = async (userId) => {
       [userId]
     ),
     pool.query(
-      'SELECT rawg_id, status, rating, favorite FROM tracked_games WHERE user_id = $1 ORDER BY created_at DESC',
+      `SELECT COALESCE(igdb_id, rawg_id) as rawg_id, rawg_id as legacy_rawg_id, igdb_id, status, rating, favorite FROM tracked_games WHERE user_id = $1 AND igdb_id IS NOT NULL ORDER BY created_at DESC`,
       [userId]
     ),
   ]);
@@ -419,7 +440,7 @@ const getAllUserIds = async (userId) => {
 module.exports = {
   addMovie, updateMovie, removeMovie, getMovieEntry, getUserMovies,
   addSeries, updateSeries, removeSeries, getSeriesEntry, getUserSeries,
-  addGame, updateGame, removeGame, getGameEntry, getUserGames,
+  addGame, updateGame, removeGame, getGameEntry, getUserGames, getGameByAnyId,
   getFavorites,
   addEpisode, updateEpisode, removeEpisode, getEpisodeEntry, getSeriesEpisodes,
   getUserRatings,

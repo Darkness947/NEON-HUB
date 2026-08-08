@@ -27,7 +27,7 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "rights": "Neon Hub. All rights reserved.",
-    "powered": "Powered by TMDB & RAWG"
+    "powered": "Powered by TMDB & IGDB"
   },
   "settings": {
     "title": "Account Settings",
@@ -239,7 +239,7 @@
     "s2L3": "Generate aggregate insights (such as your top genres).",
     "s2L4": "Communicate important updates regarding your account or our service.",
     "s3Title": "3. Data Sharing & Third Parties",
-    "s3Desc": "We do not sell, rent, or trade your personal information to third parties. We may share minimal non-identifying data with third-party APIs (like TMDB and RAWG) solely to retrieve accurate media metadata for your library.",
+    "s3Desc": "We do not sell, rent, or trade your personal information to third parties. We may share minimal non-identifying data with third-party APIs (like TMDB and IGDB) solely to retrieve accurate media metadata for your library.",
     "s4Title": "4. Data Retention & Deletion",
     "s4Desc": "You retain full control over your data. You can delete your account at any time from the Settings page. Executing an account deletion will permanently and irrevocably erase all your personal information, tracking data, reviews, and lists from our servers.",
     "s5Title": "5. Security",
@@ -255,7 +255,7 @@
     "s3Title": "3. Acceptable Use",
     "s3Desc": "You agree not to use the service for any unlawful purpose or in any way that could damage, disable, overburden, or impair our servers or networks. You must not attempt to gain unauthorized access to any part of the platform.",
     "s4Title": "4. Content & Data",
-    "s4Desc": "Neon Hub uses third-party APIs (TMDB and RAWG) for media metadata. We do not claim ownership of these images or metadata. Your personal tracking data remains yours, and we claim no ownership over your reviews or custom lists.",
+    "s4Desc": "Neon Hub uses third-party APIs (TMDB and IGDB) for media metadata. We do not claim ownership of these images or metadata. Your personal tracking data remains yours, and we claim no ownership over your reviews or custom lists.",
     "s5Title": "5. Termination",
     "s5Desc": "We reserve the right to terminate or suspend access to our service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms."
   },

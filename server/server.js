@@ -7,6 +7,9 @@ const cookieParser = require('cookie-parser');
 const errorHandler = require('./middleware/errorHandler');
 require('./config/db'); // Triggers DB connection test on startup
 
+// Log which provider is active on server startup
+const { getGamesProvider } = require('./services/gamesProviderFactory');
+const gamesProvider = getGamesProvider();
 const app = express();
 
 // ─── Security Middleware ───────────────────────────────────────────────────────

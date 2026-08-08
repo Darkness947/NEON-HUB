@@ -54,7 +54,8 @@ const Home = () => {
           }
         });
 
-      mediaService.fetchTrendingGames()
+      const randomGamePage = Math.floor(Math.random() * 20) + 1;
+      mediaService.fetchTrendingGames(randomGamePage)
         .then(data => {
           if (!cancelled) {
             setTrendingGames(data);
@@ -132,7 +133,7 @@ const Home = () => {
         <div 
           className="hero-section"
           style={{
-            backgroundImage: `linear-gradient(to right, rgba(13, 13, 26, 0.95) 0%, rgba(13, 13, 26, 0.4) 100%), url(${itemType === 'game' ? currentItem.poster_url : (currentItem.backdrop_url || currentItem.poster_url)})`,
+            backgroundImage: `linear-gradient(to right, rgba(13, 13, 26, 0.95) 0%, rgba(13, 13, 26, 0.4) 100%), url(${currentItem.backdrop_url || currentItem.poster_url})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             padding: '8vh 2rem',
