@@ -47,10 +47,6 @@ const GameDetail = () => {
             // Adapt IGDB format to look like the format the UI expects
             setGame({
               ...data,
-              title: data.name,
-              description: data.summary,
-              poster_url: data.cover_url_hd || data.cover_url,
-              vote_average: data.rating,
               screenshots: data.screenshots?.map(s => s.full || s.thumbnail) || [],
             });
           } else {

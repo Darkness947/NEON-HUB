@@ -425,7 +425,7 @@ const getAllUserIds = async (userId) => {
       [userId]
     ),
     pool.query(
-      `SELECT COALESCE(igdb_id, rawg_id) as rawg_id, rawg_id as legacy_rawg_id, igdb_id, status, rating, favorite FROM tracked_games WHERE user_id = $1 AND igdb_id IS NOT NULL ORDER BY created_at DESC`,
+      `SELECT COALESCE(igdb_id, rawg_id) as rawg_id, rawg_id as legacy_rawg_id, igdb_id, status, rating, favorite, hours_played FROM tracked_games WHERE user_id = $1 AND igdb_id IS NOT NULL ORDER BY created_at DESC`,
       [userId]
     ),
   ]);
