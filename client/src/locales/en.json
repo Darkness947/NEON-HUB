@@ -12,7 +12,8 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
-    "discover": "Discover"
+    "discover": "Discover",
+    "recentlyViewed": "Recently Viewed"
   },
   "contact": {
     "title": "Get in Touch",
@@ -117,7 +118,17 @@
     "selectedOutOfTwo": "of 2 selected",
     "compareWithAi": "Compare with AI",
     "backToLibrary": "Back to Library",
-    "discoverMedia": "Discover Media"
+    "discoverMedia": "Discover Media",
+    "edit": "Edit",
+    "done": "Done",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "removeSelected": "Remove Selected",
+    "cancel": "Cancel",
+    "noRecentActivity": "No recent activity",
+    "noRecentActivityMessage": "Media you view will appear here.",
+    "removedItems": "Removed {{count}} title(s) from Recently Viewed",
+    "selectedCount": "{{count}} Selected"
   },
   "ai": {
     "analyzingTaste": "AI is analyzing your library...",

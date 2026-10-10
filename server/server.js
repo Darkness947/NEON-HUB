@@ -67,6 +67,7 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/lists', require('./routes/lists'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/ai', require('./routes/aiRoutes'));
+app.use('/api/history', require('./routes/historyRoutes'));
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {

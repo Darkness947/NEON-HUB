@@ -12,7 +12,8 @@
     "login": "تسجيل الدخول",
     "register": "إنشاء حساب",
     "logout": "تسجيل الخروج",
-    "discover": "اكتشف"
+    "discover": "اكتشف",
+    "recentlyViewed": "شوهد مؤخراً"
   },
   "contact": {
     "title": "تواصل معنا",
@@ -117,7 +118,17 @@
     "selectedOutOfTwo": "من أصل ٢ محدد",
     "compareWithAi": "مقارنة بالذكاء الاصطناعي",
     "backToLibrary": "العودة للمكتبة",
-    "discoverMedia": "استكشف الوسائط"
+    "discoverMedia": "استكشف الوسائط",
+    "edit": "تعديل",
+    "done": "تم",
+    "selectAll": "تحديد الكل",
+    "deselectAll": "إلغاء تحديد الكل",
+    "removeSelected": "إزالة المحدد",
+    "cancel": "إلغاء",
+    "noRecentActivity": "لا يوجد نشاط حديث",
+    "noRecentActivityMessage": "ستظهر الوسائط التي تعرضها هنا.",
+    "removedItems": "تم إزالة {{count}} عنوان من شوهد مؤخراً",
+    "selectedCount": "تم تحديد {{count}}"
   },
   "ai": {
     "analyzingTaste": "يقوم الذكاء الاصطناعي بتحليل مكتبتك...",

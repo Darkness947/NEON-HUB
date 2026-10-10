@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import mediaService from '../../services/mediaService';
 import reviewService from '../../services/reviewService';
 import MediaCard from '../../components/media/MediaCard';
 import { formatDate } from '../../utils/formatDate';
 import { useLibrary } from '../../hooks/useLibrary';
+import historyService from '../../services/historyService';
 import { getStatusColor } from '../../utils/getStatusColor';
 import FavoriteButton from '../../components/media/FavoriteButton';
 import ReviewModal from '../../components/media/ReviewModal';
@@ -23,6 +24,7 @@ const MovieDetail = () => {
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const hasRecordedVisit = useRef(false);
   const [reviewsError, setReviewsError] = useState(null);
   
   const { getStatus, isInLibrary, addToLibrary, removeFromLibrary } = useLibrary();
@@ -43,6 +45,11 @@ const MovieDetail = () => {
         const data = await mediaService.getMovieById(id);
         if (!cancelled) setMovie(data);
         
+        if (!hasRecordedVisit.current) {
+          historyService.recordVisit('movie', id);
+          hasRecordedVisit.current = true;
+        }
+
         try {
           const revData = await reviewService.getMediaReviews('movie', id);
           if (!cancelled) setReviews(revData);

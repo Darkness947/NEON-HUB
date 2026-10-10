@@ -6,6 +6,7 @@ import GameCard from '../../components/media/GameCard';
 import SkeletonCard from '../../components/media/SkeletonCard';
 import EmptyState from '../../components/common/EmptyState';
 import { useTranslation } from 'react-i18next';
+import RecentlyViewed from '../../components/library/RecentlyViewed';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ const Library = () => {
   const [activeTab, setActiveTab] = useState('movies');
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Page-level fetching with pagination
   const [items, setItems] = useState([]);
@@ -62,6 +64,7 @@ const Library = () => {
 
   // Use context ID counts for tab totals (always accurate)
   const tabs = [
+    { key: 'recent', label: t('nav.recentlyViewed'), count: null },
     { key: 'movies', label: t('nav.movies'), count: movieIds.length },
     { key: 'series', label: t('nav.series'), count: seriesIds.length },
     { key: 'games', label: t('nav.games'), count: gameIds.length },
@@ -104,6 +107,8 @@ const Library = () => {
   const handleTabChange = (key) => {
     setActiveTab(key);
     setSelectedItems([]);
+    setIsCompareMode(false);
+    setIsEditMode(false);
   };
 
   return (
@@ -111,35 +116,47 @@ const Library = () => {
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap" style={{ gap: '15px' }}>
         <h1 className="section-title m-0">{t('library.title')}</h1>
         <div className="d-flex gap-2">
-          {total >= 5 && !isCompareMode && (
+          {activeTab === 'recent' ? (
             <button 
-              className="btn btn-primary"
-              onClick={handleRecommend}
-              style={{
-                borderRadius: '20px',
-                padding: '6px 16px',
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
+              className={`btn ${isEditMode ? 'btn-secondary' : 'btn-outline-light'}`}
+              onClick={() => setIsEditMode(!isEditMode)}
+              style={{ borderRadius: '20px', padding: '6px 16px', fontSize: '0.9rem' }}
             >
-              <span style={{ fontSize: '1.2rem' }}>✨</span>
-              {t('library.recommendWithAi', 'Recommend with AI')}
+              {isEditMode ? t('library.done') : t('library.edit')}
             </button>
-          )}
-          {total >= 2 && (
-            <button 
-              className={`btn ${isCompareMode ? 'btn-danger' : 'btn-outline-light'}`}
-              onClick={handleToggleCompareMode}
-              style={{
-                borderRadius: '20px',
-                padding: '6px 16px',
-                fontSize: '0.9rem',
-              }}
-            >
-              {isCompareMode ? t('library.cancelCompare', 'Cancel') : t('library.compareMode', 'Compare Mode')}
-            </button>
+          ) : (
+            <>
+              {total >= 5 && !isCompareMode && (
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleRecommend}
+                  style={{
+                    borderRadius: '20px',
+                    padding: '6px 16px',
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>✨</span>
+                  {t('library.recommendWithAi', 'Recommend with AI')}
+                </button>
+              )}
+              {total >= 2 && (
+                <button 
+                  className={`btn ${isCompareMode ? 'btn-danger' : 'btn-outline-light'}`}
+                  onClick={handleToggleCompareMode}
+                  style={{
+                    borderRadius: '20px',
+                    padding: '6px 16px',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  {isCompareMode ? t('library.cancelCompare', 'Cancel') : t('library.compareMode', 'Compare Mode')}
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -158,17 +175,19 @@ const Library = () => {
                 fontFamily: 'var(--font-ui)',
                 fontWeight: 600,
                 letterSpacing: '0.5px',
-                transition: 'all var(--transition-neon)',
+                transition: 'all var(--transition-neon)'
               }}
               onClick={() => handleTabChange(tab.key)}
             >
-              {tab.label} ({tab.count})
+              {tab.label} {tab.count !== null ? `(${tab.count})` : ''}
             </button>
           </li>
         ))}
       </ul>
 
-      {isLoading ? (
+      {activeTab === 'recent' ? (
+        <RecentlyViewed isEditMode={isEditMode} setEditMode={setIsEditMode} />
+      ) : isLoading ? (
         <div className="media-grid">
           {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
