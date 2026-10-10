@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import historyService from '../../services/historyService';
 import MediaCard from '../media/MediaCard';
-import SkeletonGrid from '../common/SkeletonGrid';
+import SkeletonCard from '../media/SkeletonCard';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useLibrary } from '../../hooks/useLibrary';
@@ -86,7 +86,13 @@ const RecentlyViewed = ({ isEditMode, setEditMode }) => {
   if (isLoading) {
     return (
       <div className="container mt-4">
-        <SkeletonGrid count={12} />
+        <div className="row g-4">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="col-6 col-sm-4 col-md-3 col-lg-2">
+              <SkeletonCard />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
