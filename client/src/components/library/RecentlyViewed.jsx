@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import historyService from '../../services/historyService';
 import MediaCard from '../media/MediaCard';
 import SkeletonCard from '../media/SkeletonCard';
+import GameCard from '../media/GameCard';
+import EmptyState from '../common/EmptyState';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useLibrary } from '../../hooks/useLibrary';
@@ -107,9 +109,14 @@ const RecentlyViewed = ({ isEditMode, setEditMode }) => {
 
   if (history.length === 0) {
     return (
-      <div className="container mt-4 text-center text-muted">
-        <h4>{t('library.noRecentActivity')}</h4>
-        <p>{t('library.noRecentActivityMessage')}</p>
+      <div className="container mt-4">
+        <EmptyState
+          icon="🕒"
+          title={t('library.noRecentActivity')}
+          message={t('library.noRecentActivityMessage')}
+          actionText={t('library.discoverMedia')}
+          actionLink="/discover"
+        />
       </div>
     );
   }
@@ -117,55 +124,72 @@ const RecentlyViewed = ({ isEditMode, setEditMode }) => {
   return (
     <div className="container mt-4 pb-5">
       {isEditMode && (
-        <div className="d-flex justify-content-between align-items-center mb-4 bg-dark p-3 rounded fade-in sticky-top" style={{ top: '80px', zIndex: 100 }}>
+        <div 
+          className="position-fixed bottom-0 start-0 w-100 d-flex justify-content-between align-items-center px-4 py-3"
+          style={{
+            backgroundColor: 'rgba(10, 10, 10, 0.95)',
+            borderTop: '1px solid var(--border-neon)',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.5)',
+            zIndex: 1000,
+            backdropFilter: 'blur(10px)'
+          }}
+        >
           <div>
-            <span className="fw-bold me-3 text-light">{t('library.selectedCount', { count: selectedIds.size })}</span>
-            <button className="btn btn-sm btn-outline-light me-2" onClick={handleSelectAll}>
+            <h5 className="m-0 mb-1" style={{ color: 'var(--color-accent-purple)' }}>{t('library.edit', 'Edit Mode')}</h5>
+            <div className="text-muted small">
+              {selectedIds.size} {t('library.selectedOutOfTotal', 'selected')}
+            </div>
+          </div>
+          
+          <div className="d-flex gap-2 align-items-center">
+            <button 
+              className="btn btn-outline-light"
+              onClick={handleSelectAll}
+              style={{ borderRadius: '20px', padding: '6px 16px', fontSize: '0.9rem' }}
+            >
               {selectedIds.size === history.length ? t('library.deselectAll') : t('library.selectAll')}
             </button>
             <button 
-              className="btn btn-sm btn-danger" 
+              className="btn btn-danger" 
               disabled={selectedIds.size === 0}
               onClick={handleRemoveSelected}
+              style={{ borderRadius: '20px', padding: '6px 16px', fontSize: '0.9rem' }}
             >
               {t('library.removeSelected')}
             </button>
+            <button 
+              className="btn btn-secondary ms-2"
+              onClick={() => { setEditMode(false); setSelectedIds(new Set()); }}
+              style={{ borderRadius: '20px', padding: '6px 16px', fontSize: '0.9rem' }}
+            >
+              {t('library.cancel')}
+            </button>
           </div>
-          <button className="btn btn-sm btn-secondary" onClick={() => { setEditMode(false); setSelectedIds(new Set()); }}>
-            {t('library.cancel')}
-          </button>
         </div>
       )}
 
       <div className="row g-4">
         {history.map((item) => (
           <div key={item.history_id} className="col-6 col-sm-4 col-md-3 col-lg-2 position-relative">
-            {isEditMode && (
-              <div 
-                className="position-absolute w-100 h-100" 
-                style={{ zIndex: 10, cursor: 'pointer', backgroundColor: selectedIds.has(item.history_id) ? 'rgba(0,0,0,0.5)' : 'transparent' }}
-                onClick={() => handleSelect(item.history_id)}
-              >
-                <div 
-                  className="position-absolute rounded-circle bg-dark d-flex align-items-center justify-content-center"
-                  style={{ 
-                    top: '10px', 
-                    right: '10px', 
-                    width: '30px', 
-                    height: '30px',
-                    border: '2px solid white',
-                    color: selectedIds.has(item.history_id) ? 'var(--color-accent-blue)' : 'transparent'
-                  }}
-                >
-                  ✓
-                </div>
-              </div>
+            {item.media_type === 'game' ? (
+              <GameCard
+                {...item}
+                media_type={item.media_type}
+                id={item.media_id}
+                selectable={isEditMode}
+                selected={selectedIds.has(item.history_id)}
+                onSelect={() => handleSelect(item.history_id)}
+              />
+            ) : (
+              <MediaCard
+                {...item}
+                media_type={item.media_type}
+                id={item.media_id}
+                selectable={isEditMode}
+                selected={selectedIds.has(item.history_id)}
+                onSelect={() => handleSelect(item.history_id)}
+              />
             )}
-            
-            <MediaCard
-              item={{...item, media_type: item.media_type, id: item.media_id}}
-              type={item.media_type}
-            />
 
             {!isEditMode && !item.status && (
               <div className="mt-2 w-100 text-center">
