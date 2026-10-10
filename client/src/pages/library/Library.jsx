@@ -18,6 +18,7 @@ const Library = () => {
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [recentCount, setRecentCount] = useState(null);
 
   // Page-level fetching with pagination
   const [items, setItems] = useState([]);
@@ -64,7 +65,7 @@ const Library = () => {
 
   // Use context ID counts for tab totals (always accurate)
   const tabs = [
-    { key: 'recent', label: t('nav.recentlyViewed'), count: null },
+    { key: 'recent', label: t('nav.recentlyViewed'), count: recentCount },
     { key: 'movies', label: t('nav.movies'), count: movieIds.length },
     { key: 'series', label: t('nav.series'), count: seriesIds.length },
     { key: 'games', label: t('nav.games'), count: gameIds.length },
@@ -186,7 +187,7 @@ const Library = () => {
       </ul>
 
       {activeTab === 'recent' ? (
-        <RecentlyViewed isEditMode={isEditMode} setEditMode={setIsEditMode} />
+        <RecentlyViewed isEditMode={isEditMode} setEditMode={setIsEditMode} setRecentCount={setRecentCount} />
       ) : isLoading ? (
         <div className="media-grid">
           {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}

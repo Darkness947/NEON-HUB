@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useLibrary } from '../../hooks/useLibrary';
 
-const RecentlyViewed = ({ isEditMode, setEditMode }) => {
+const RecentlyViewed = ({ isEditMode, setEditMode, setRecentCount }) => {
   const { t } = useTranslation();
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +23,10 @@ const RecentlyViewed = ({ isEditMode, setEditMode }) => {
       setIsLoading(true);
       try {
         const data = await historyService.getHistory();
-        if (!cancelled) setHistory(data);
+        if (!cancelled) {
+          setHistory(data);
+          if (setRecentCount) setRecentCount(data.length);
+        }
       } catch (err) {
         if (!cancelled) setError(err.message || 'Failed to load history');
       } finally {
@@ -61,7 +64,11 @@ const RecentlyViewed = ({ isEditMode, setEditMode }) => {
     try {
       const idsToRemove = Array.from(selectedIds);
       await historyService.removeHistory(idsToRemove);
-      setHistory(prev => prev.filter(item => !idsToRemove.includes(item.history_id)));
+      setHistory(prev => {
+        const next = prev.filter(item => !idsToRemove.includes(item.history_id));
+        if (setRecentCount) setRecentCount(next.length);
+        return next;
+      });
       toast.success(t('library.removedItems', { count: idsToRemove.length }));
       setSelectedIds(new Set());
       setEditMode(false);
@@ -176,6 +183,7 @@ const RecentlyViewed = ({ isEditMode, setEditMode }) => {
                 {...item}
                 media_type={item.media_type}
                 id={item.media_id}
+                showDropdown={true}
                 selectable={isEditMode}
                 selected={selectedIds.has(item.history_id)}
                 onSelect={() => handleSelect(item.history_id)}
@@ -185,21 +193,11 @@ const RecentlyViewed = ({ isEditMode, setEditMode }) => {
                 {...item}
                 media_type={item.media_type}
                 id={item.media_id}
+                showDropdown={true}
                 selectable={isEditMode}
                 selected={selectedIds.has(item.history_id)}
                 onSelect={() => handleSelect(item.history_id)}
               />
-            )}
-
-            {!isEditMode && !item.status && (
-              <div className="mt-2 w-100 text-center">
-                <button 
-                  className="btn btn-sm btn-outline-primary w-100" 
-                  onClick={() => handleAddFromHistory(item.media_type, item.media_id)}
-                >
-                  ➕ {t('media.addToLibrary')}
-                </button>
-              </div>
             )}
           </div>
         ))}
