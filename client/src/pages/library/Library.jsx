@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLibrary } from '../../hooks/useLibrary';
 import libraryService from '../../services/libraryService';
+import historyService from '../../services/historyService';
 import MediaCard from '../../components/media/MediaCard';
 import GameCard from '../../components/media/GameCard';
 import SkeletonCard from '../../components/media/SkeletonCard';
@@ -18,7 +19,20 @@ const Library = () => {
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [recentCount, setRecentCount] = useState(null);
+  const [recentCount, setRecentCount] = useState(0);
+
+  // Fetch initial recently viewed count so the tab badge is immediately visible
+  useEffect(() => {
+    let cancelled = false;
+    historyService.getHistoryCount().then(cnt => {
+      if (!cancelled && typeof cnt === 'number') {
+        setRecentCount(cnt);
+      }
+    }).catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Page-level fetching with pagination
   const [items, setItems] = useState([]);
@@ -29,6 +43,7 @@ const Library = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const fetchPage = useCallback(async (type, pageNum, append = false) => {
+    if (type === 'recent') return;
     try {
       if (append) {
         setIsLoadingMore(true);
@@ -53,6 +68,7 @@ const Library = () => {
   }, []);
 
   useEffect(() => {
+    if (activeTab === 'recent') return;
     setItems([]);
     setPage(1);
     setHasMore(false);
@@ -180,7 +196,7 @@ const Library = () => {
               }}
               onClick={() => handleTabChange(tab.key)}
             >
-              {tab.label} {tab.count !== null ? `(${tab.count})` : ''}
+              {tab.label} ({tab.count ?? 0})
             </button>
           </li>
         ))}
@@ -238,10 +254,10 @@ const Library = () => {
                 {isLoadingMore ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Loading...
+                    {t('common.loading', 'Loading...')}
                   </>
                 ) : (
-                  `Load More (${items.length} of ${total})`
+                  `${t('common.loadMore', 'Load More')} (${items.length} ${t('common.of', 'of')} ${total})`
                 )}
               </button>
             </div>

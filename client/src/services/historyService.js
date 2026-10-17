@@ -19,6 +19,16 @@ const historyService = {
   removeHistory: async (ids) => {
     const response = await api.delete('/api/history', { data: { ids } });
     return response.data.data;
+  },
+
+  getHistoryCount: async () => {
+    try {
+      const response = await api.get('/api/history/count');
+      return response.data.data.count;
+    } catch (error) {
+      console.error('Failed to get history count:', error);
+      return 0;
+    }
   }
 };
 

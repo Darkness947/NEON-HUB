@@ -135,9 +135,15 @@ const MyRatings = () => {
                 disabled={isLoadingMore}
               >
                 {isLoadingMore ? (
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                ) : null}
-                {isLoadingMore ? t('common.loading') || 'Loading...' : t('common.loadMore') || 'Load More'}
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+                    {t('ratings.loading', 'Loading...')}
+                  </>
+                ) : (
+                  totalCount
+                    ? `${t('ratings.loadMore', 'Load More')} (${ratings.length} ${t('ratings.of', 'of')} ${totalCount})`
+                    : t('ratings.loadMore', 'Load More')
+                )}
               </button>
             </div>
           )}

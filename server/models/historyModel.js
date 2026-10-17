@@ -33,8 +33,17 @@ const removeHistory = async (userId, ids) => {
   return result.rows;
 };
 
+const getHistoryCount = async (userId) => {
+  const result = await pool.query(
+    'SELECT COUNT(*)::int as count FROM recently_viewed WHERE user_id = $1',
+    [userId]
+  );
+  return result.rows[0]?.count ? parseInt(result.rows[0].count, 10) : 0;
+};
+
 module.exports = {
   logVisit,
   getHistory,
+  getHistoryCount,
   removeHistory
 };

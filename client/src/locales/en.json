@@ -277,6 +277,14 @@
   },
   "ratings": {
     "title": "My Ratings",
-    "noRatings": "No ratings given yet."
+    "noRatings": "No ratings given yet.",
+    "loadMore": "Load More",
+    "loading": "Loading...",
+    "of": "of"
+  },
+  "common": {
+    "loadMore": "Load More",
+    "loading": "Loading...",
+    "of": "of"
   }
 }

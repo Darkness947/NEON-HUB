@@ -86,8 +86,19 @@ const removeHistory = asyncHandler(async (req, res) => {
   });
 });
 
+const getHistoryCount = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const count = await historyModel.getHistoryCount(userId);
+
+  res.status(200).json({
+    success: true,
+    data: { count }
+  });
+});
+
 module.exports = {
   recordVisit,
   getHistory,
+  getHistoryCount,
   removeHistory
 };
