@@ -82,6 +82,17 @@ const _cleanGame = (rawGame) => ({
   provider:         'igdb',
 });
 
+// ─── Cache Settings ─────────────────────────────────────────────────────────────
+// Game metadata (title, cover, genres) almost never changes — cache for 24h.
+const GAME_TTL = 60 * 60 * 24;
+// Trending pool: one IGDB request backs Home + Discover pages 1..POOL_PAGES.
+const POOL_PAGE_SIZE = 20;
+const POOL_PAGES = 10;
+const POOL_TTL = 60 * 30;
+const POOL_CACHE_KEY = 'igdb_trending_pool';
+
+const _gameCacheKey = (id) => `igdb_game_${id}`;
+
 let batchQueue = [];
 let batchTimer = null;
 
@@ -109,7 +120,10 @@ const dispatchBatch = async () => {
     const data = await _igdbRequest('/games', apicalypse);
     const mapped = data.map(_cleanGame);
     const gameMap = {};
-    mapped.forEach(g => gameMap[g.igdb_id] = g);
+    mapped.forEach(g => {
+      gameMap[g.igdb_id] = g;
+      cache.set(_gameCacheKey(g.igdb_id), g, GAME_TTL);
+    });
     
     currentBatch.forEach(b => {
       if (gameMap[b.id]) {
@@ -123,18 +137,55 @@ const dispatchBatch = async () => {
   }
 };
 
+// Single request for the top trending games; cached and shared by all callers.
+// Concurrent callers during a cold cache share one in-flight request.
+let poolInFlight = null;
+
+const _getTrendingPool = async () => {
+  const cached = cache.get(POOL_CACHE_KEY);
+  if (cached) return cached;
+  if (poolInFlight) return poolInFlight;
+
+  poolInFlight = (async () => {
+    try {
+      const apicalypse = `
+        ${GAME_FIELDS}
+        where rating > 75 & rating_count > 10 & cover != null;
+        sort rating_count desc;
+        limit ${POOL_PAGE_SIZE * POOL_PAGES};
+      `;
+      const data = await _igdbRequest('/games', apicalypse);
+      const cleaned = data.map(_cleanGame);
+      cleaned.forEach(g => cache.set(_gameCacheKey(g.igdb_id), g, GAME_TTL));
+      cache.set(POOL_CACHE_KEY, cleaned, POOL_TTL);
+      return cleaned;
+    } finally {
+      poolInFlight = null;
+    }
+  })();
+
+  return poolInFlight;
+};
+
 const igdbService = {
   getTrendingGames: async (page = 1) => {
+    // Pages covered by the pool are served from memory (one shared IGDB call)
+    if (page >= 1 && page <= POOL_PAGES) {
+      const pool = await _getTrendingPool();
+      const start = (page - 1) * POOL_PAGE_SIZE;
+      return pool.slice(start, start + POOL_PAGE_SIZE);
+    }
+
     const cacheKey = `igdb_trending_games_${page}`;
     const cached = cache.get(cacheKey);
     if (cached) return cached;
 
-    const offset = (page - 1) * 20;
+    const offset = (page - 1) * POOL_PAGE_SIZE;
     const apicalypse = `
       ${GAME_FIELDS}
       where rating > 75 & rating_count > 10 & cover != null;
       sort rating_count desc;
-      limit 20;
+      limit ${POOL_PAGE_SIZE};
       offset ${offset};
     `;
 
@@ -144,6 +195,19 @@ const igdbService = {
     cache.set(cacheKey, cleaned, 600);
     return cleaned;
   },
+
+  // Random selection from the popular pool — changes on every reload, always cached
+  getRandomTrendingGames: async (count = POOL_PAGE_SIZE) => {
+    const pool = await _getTrendingPool();
+    const shuffled = [...pool];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, count);
+  },
+
+  warmTrendingPool: () => _getTrendingPool(),
 
   searchGames: async (query, page = 1) => {
     if (!query) return { items: [], page: 1, hasMore: false };
@@ -166,6 +230,9 @@ const igdbService = {
   },
 
   getGameById: (igdbId) => {
+    const cached = cache.get(_gameCacheKey(igdbId));
+    if (cached) return Promise.resolve(cached);
+
     return new Promise((resolve, reject) => {
       batchQueue.push({ id: igdbId, resolve, reject });
       if (!batchTimer) {

@@ -20,6 +20,12 @@ const dashboardService = {
     const response = await api.get('/api/dashboard/insights');
     return response.data.data;
   },
+
+  // { counts, insights, recentActivity } — everything the Profile page needs
+  getProfileSummary: async () => {
+    const response = await api.get('/api/dashboard/profile-summary');
+    return response.data.data;
+  },
 };
 
 export default dashboardService;

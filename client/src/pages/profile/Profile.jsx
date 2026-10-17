@@ -1,14 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import libraryService from '../../services/libraryService';
-import reviewService from '../../services/reviewService';
 import dashboardService from '../../services/dashboardService';
 import ReviewCard from '../../components/media/ReviewCard';
 import FullPageLoader from '../../components/common/Loader';
 import SkeletonDetail from '../../components/common/SkeletonDetail';
 import InsightsChart from '../../components/profile/InsightsChart';
-import defaultAvatar from '../../assets/images/default_avatar.png';
+import defaultAvatar from '../../assets/images/default_avatar.webp';
 import { useTranslation } from 'react-i18next';
+
+const StatValue = ({ value, isLoading, className }) => (
+  isLoading ? (
+    <span
+      className="skeleton-shimmer d-inline-block mb-1"
+      style={{ width: '48px', height: '1.8rem', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.06)' }}
+      aria-hidden="true"
+    />
+  ) : (
+    <h4 className={`${className} fw-bold mb-1`} style={{ fontSize: '1.8rem' }}>{value}</h4>
+  )
+);
 
 const Profile = () => {
   const { user } = useAuth();
@@ -24,49 +34,12 @@ const Profile = () => {
     const fetchProfileData = async () => {
       setIsLoading(true);
       try {
-        const [moviesRes, seriesRes, gamesRes, reviewsRes, ratingsRes, insightsData] = await Promise.all([
-          libraryService.getLibrary('movies', '', 1),
-          libraryService.getLibrary('series', '', 1),
-          libraryService.getLibrary('games', '', 1),
-          reviewService.getReviews(),
-          libraryService.getRatings(),
-          dashboardService.getInsights()
-        ]);
+        // One request: counts + rating distribution + 5 latest rated/reviewed items
+        const { counts, insights: insightsData, recentActivity } = await dashboardService.getProfileSummary();
 
         if (!cancelled) {
-          setStats({
-            movies: moviesRes.total || 0,
-            series: seriesRes.total || 0,
-            games: gamesRes.total || 0,
-            total: (moviesRes.total || 0) + (seriesRes.total || 0) + (gamesRes.total || 0),
-          });
-
-          const allActivityMap = new Map();
-          
-          [...reviewsRes, ...ratingsRes].forEach(item => {
-            // For episodes, include season/episode in key to avoid collapsing different episodes
-            const key = item.media_type === 'episode'
-              ? `episode-${item.media_id}-S${item.season_number}E${item.episode_number}`
-              : `${item.media_type}-${item.media_id}`;
-            if (!allActivityMap.has(key)) {
-              allActivityMap.set(key, item);
-            } else {
-              const existing = allActivityMap.get(key);
-              const existingDate = new Date(existing.created_at);
-              const newDate = new Date(item.created_at);
-              allActivityMap.set(key, { 
-                ...existing, 
-                ...item, 
-                created_at: existingDate > newDate ? existing.created_at : item.created_at 
-              });
-            }
-          });
-          
-          const combinedActivity = Array.from(allActivityMap.values())
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 5);
-
-          setRecentReviews(combinedActivity);
+          setStats(counts);
+          setRecentReviews(recentActivity);
           setInsights(insightsData);
         }
       } catch (error) {
@@ -121,25 +94,25 @@ const Profile = () => {
           <div className="row g-3 mb-3">
             <div className="col-6 col-sm-3">
               <div className="card p-3 text-center d-flex flex-column justify-content-center" style={{ backgroundColor: 'var(--color-bg-elevated)', border: 'none' }}>
-                <h4 className="text-accent-blue fw-bold mb-1" style={{ fontSize: '1.8rem' }}>{stats.total}</h4>
+                <StatValue value={stats.total} isLoading={isLoading} className="text-accent-blue" />
                 <span className="text-muted small text-uppercase fw-bold">{t('library.all')}</span>
               </div>
             </div>
             <div className="col-6 col-sm-3">
               <div className="card p-3 text-center d-flex flex-column justify-content-center" style={{ backgroundColor: 'var(--color-bg-elevated)', border: 'none' }}>
-                <h4 className="text-light fw-bold mb-1" style={{ fontSize: '1.8rem' }}>{stats.movies}</h4>
+                <StatValue value={stats.movies} isLoading={isLoading} className="text-light" />
                 <span className="text-muted small text-uppercase fw-bold">{t('nav.movies')}</span>
               </div>
             </div>
             <div className="col-6 col-sm-3">
               <div className="card p-3 text-center d-flex flex-column justify-content-center" style={{ backgroundColor: 'var(--color-bg-elevated)', border: 'none' }}>
-                <h4 className="text-light fw-bold mb-1" style={{ fontSize: '1.8rem' }}>{stats.series}</h4>
+                <StatValue value={stats.series} isLoading={isLoading} className="text-light" />
                 <span className="text-muted small text-uppercase fw-bold">{t('nav.series')}</span>
               </div>
             </div>
             <div className="col-6 col-sm-3">
               <div className="card p-3 text-center d-flex flex-column justify-content-center" style={{ backgroundColor: 'var(--color-bg-elevated)', border: 'none' }}>
-                <h4 className="text-light fw-bold mb-1" style={{ fontSize: '1.8rem' }}>{stats.games}</h4>
+                <StatValue value={stats.games} isLoading={isLoading} className="text-light" />
                 <span className="text-muted small text-uppercase fw-bold">{t('nav.games')}</span>
               </div>
             </div>

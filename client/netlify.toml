@@ -1,4 +1,23 @@
+# ─── API Proxy ────────────────────────────────────────────────────────────────
+# Forwards /api/* to the Render backend so the browser sees the API as
+# same-origin. This makes the refresh-token cookie first-party, which is
+# required for Safari (ITP) and Firefox (Total Cookie Protection).
+# MUST stay above the SPA fallback rule.
+[[redirects]]
+  from = "/api/*"
+  to = "https://neon-hub-qdgy.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# ─── SPA Fallback ─────────────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# ─── Caching ──────────────────────────────────────────────────────────────────
+# Vite emits content-hashed filenames, so they can be cached forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

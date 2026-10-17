@@ -1,16 +1,49 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import defaultAvatar from '../../assets/images/default_avatar.png';
+import defaultAvatar from '../../assets/images/default_avatar.webp';
 import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const location = useLocation();
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setShowDropdown(false);
+    setIsNavCollapsed(true);
+  }, [location.pathname]);
+
+  // Close dropdown on click outside or Escape key
+  useEffect(() => {
+    if (!showDropdown) return;
+
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showDropdown]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -25,6 +58,8 @@ const Navbar = () => {
     setShowDropdown(false);
     navigate('/login');
   };
+
+  const isRtl = i18n?.dir ? i18n.dir() === 'rtl' : document.documentElement.dir === 'rtl';
 
   return (
     <nav
@@ -139,13 +174,14 @@ const Navbar = () => {
                   </Link>
                 </li>
 
-                {/* User Dropdown */}
-                <li className="nav-item dropdown ms-2" style={{ position: 'relative' }}>
+                {/* Animated User Dropdown */}
+                <li ref={dropdownRef} className="nav-item dropdown ms-2" style={{ position: 'relative' }}>
                   <button
                     className="btn btn-link nav-link d-flex align-items-center gap-2 p-0"
                     onClick={() => setShowDropdown(!showDropdown)}
                     aria-label="User menu"
                     aria-expanded={showDropdown}
+                    aria-haspopup="true"
                     style={{ textDecoration: 'none' }}
                   >
                     <div
@@ -155,8 +191,8 @@ const Navbar = () => {
                         borderRadius: '50%',
                         overflow: 'hidden',
                         border: '2px solid var(--neon-cyan)',
-                        boxShadow: '0 0 8px rgba(0, 245, 255, 0.3)',
-                        transition: 'box-shadow 0.3s ease',
+                        boxShadow: showDropdown ? '0 0 12px rgba(0, 245, 255, 0.6)' : '0 0 8px rgba(0, 245, 255, 0.3)',
+                        transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
                       }}
                     >
                       <img 
@@ -172,52 +208,60 @@ const Navbar = () => {
                     >
                       {user?.username}
                     </span>
+                    <svg
+                      className={`user-chevron ${showDropdown ? 'is-open' : ''}`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ display: 'inline-block' }}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
                   </button>
 
-                  {showDropdown && (
-                    <div
-                      className="dropdown-menu show"
-                      style={{
-                        position: 'absolute',
-                        right: document.documentElement.dir === 'rtl' ? 'auto' : 0,
-                        left: document.documentElement.dir === 'rtl' ? 0 : 'auto',
-                        top: '100%',
-                        marginTop: '8px',
-                        minWidth: '180px',
-                        backgroundColor: 'var(--color-bg-surface)',
-                        border: '1px solid var(--border-neon)',
-                        borderRadius: 'var(--radius-md)',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 245, 255, 0.1)',
-                      }}
+                  {/* Dropdown element stays in DOM and animates smoothly */}
+                  <div
+                    className={`user-dropdown-menu ${showDropdown ? 'is-open' : ''}`}
+                    style={{
+                      right: isRtl ? 'auto' : 0,
+                      left: isRtl ? 0 : 'auto',
+                    }}
+                    role="menu"
+                    aria-orientation="vertical"
+                  >
+                    <Link className="dropdown-item" to="/profile" onClick={() => setShowDropdown(false)} role="menuitem">
+                      <span>👤</span> <span>{t('nav.profile')}</span>
+                    </Link>
+                    <Link className="dropdown-item" to="/favorites" onClick={() => setShowDropdown(false)} role="menuitem">
+                      <span>❤️</span> <span>{t('favorites.title')}</span>
+                    </Link>
+                    <Link className="dropdown-item" to="/ratings" onClick={() => setShowDropdown(false)} role="menuitem">
+                      <span>⭐</span> <span>{t('media.rating')}</span>
+                    </Link>
+                    <Link className="dropdown-item" to="/reviews" onClick={() => setShowDropdown(false)} role="menuitem">
+                      <span>✍️</span> <span>{t('reviews.title')}</span>
+                    </Link>
+                    <Link className="dropdown-item" to="/lists" onClick={() => setShowDropdown(false)} role="menuitem">
+                      <span>📋</span> <span>{t('lists.title')}</span>
+                    </Link>
+                    <Link className="dropdown-item" to="/settings" onClick={() => setShowDropdown(false)} role="menuitem">
+                      <span>⚙️</span> <span>{t('nav.settings')}</span>
+                    </Link>
+                    <hr className="dropdown-divider my-2" style={{ borderColor: 'var(--border-neon)' }} />
+                    <button
+                      className="dropdown-item text-danger"
+                      onClick={handleLogout}
+                      role="menuitem"
                     >
-                      <Link className="dropdown-item py-2" to="/profile" onClick={() => setShowDropdown(false)}>
-                        👤 {t('nav.profile')}
-                      </Link>
-                      <Link className="dropdown-item py-2" to="/favorites" onClick={() => setShowDropdown(false)}>
-                        ❤️ {t('favorites.title')}
-                      </Link>
-                      <Link className="dropdown-item py-2" to="/ratings" onClick={() => setShowDropdown(false)}>
-                        ⭐ {t('media.rating')}
-                      </Link>
-                      <Link className="dropdown-item py-2" to="/reviews" onClick={() => setShowDropdown(false)}>
-                        ✍️ {t('reviews.title')}
-                      </Link>
-                      <Link className="dropdown-item py-2" to="/lists" onClick={() => setShowDropdown(false)}>
-                        📋 {t('lists.title')}
-                      </Link>
-                      <Link className="dropdown-item py-2" to="/settings" onClick={() => setShowDropdown(false)}>
-                        ⚙️ {t('nav.settings')}
-                      </Link>
-                      <hr className="dropdown-divider" style={{ borderColor: 'var(--border-neon)' }} />
-                      <button
-                        className="dropdown-item py-2"
-                        onClick={handleLogout}
-                        style={{ color: 'var(--color-danger)' }}
-                      >
-                        🚪 {t('nav.logout')}
-                      </button>
-                    </div>
-                  )}
+                      <span>🚪</span> <span>{t('nav.logout')}</span>
+                    </button>
+                  </div>
                 </li>
               </>
             ) : (

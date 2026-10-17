@@ -59,6 +59,12 @@ const mediaService = {
     return data.data;
   },
 
+  // Random popular games (server-side cached pool) — different on every reload
+  fetchRandomTrendingGames: async () => {
+    const { data } = await api.get('/api/games/trending', { params: { random: 1 } });
+    return data.data;
+  },
+
   searchGames: async (query, page = 1) => {
     const { data } = await api.get('/api/games/search', { params: { q: query, page } });
     return data.data;

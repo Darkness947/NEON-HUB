@@ -1,4 +1,4 @@
-import mainLogo from '../assets/images/main_logo.png';
+import mainLogo from '../assets/images/main_logo.webp';
 import { useTranslation } from 'react-i18next';
 
 const Contact = () => {

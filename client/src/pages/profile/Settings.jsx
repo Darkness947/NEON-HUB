@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import authService from '../../services/authService';
 import toast from 'react-hot-toast';
-import defaultAvatar from '../../assets/images/default_avatar.png';
+import defaultAvatar from '../../assets/images/default_avatar.webp';
 import { useTranslation } from 'react-i18next';
 
 const Settings = () => {

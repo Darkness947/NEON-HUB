@@ -15,6 +15,31 @@ const issueAccessToken = (userId) =>
     { expiresIn: process.env.JWT_EXPIRES_IN || '24h', algorithm: 'HS256' }
   );
 
+// ─── Refresh Cookie ─────────────────────────────────────────────────────────────
+// The frontend reaches the API through a same-origin proxy (Netlify in prod,
+// Vite in dev), so the cookie is FIRST-PARTY. That lets us use SameSite=Strict
+// (CSRF-proof) and keeps Safari ITP / Firefox TCP from dropping it.
+const REFRESH_COOKIE = 'refreshToken';
+const REFRESH_COOKIE_PATH = '/api/auth'; // only sent to auth endpoints
+
+const _isProd = () =>
+  process.env.NODE_ENV === 'production' ||
+  process.env.NODE_ENV === 'prod' ||
+  Boolean(process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
+
+const _cookieOptions = (path = REFRESH_COOKIE_PATH) => ({
+  httpOnly: true,
+  secure: _isProd(),
+  sameSite: 'strict',
+  path,
+});
+
+const _clearRefreshCookie = (res) => {
+  res.clearCookie(REFRESH_COOKIE, _cookieOptions());
+  // Legacy cookies were issued on path "/" — clear those too
+  res.clearCookie(REFRESH_COOKIE, _cookieOptions('/'));
+};
+
 const issueRefreshToken = async (userId, res, absoluteExpiresAt = null) => {
   // Generate the secret part (random 32 bytes)
   const secret = crypto.randomBytes(32).toString('hex');
@@ -36,15 +61,9 @@ const issueRefreshToken = async (userId, res, absoluteExpiresAt = null) => {
   // Cookie value = selector.secret
   const cookieValue = `${row.id}.${secret}`;
 
-  // Robust check for production / cross-site environments
-  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod' || (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
-
-  res.cookie('refreshToken', cookieValue, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+  res.cookie(REFRESH_COOKIE, cookieValue, {
+    ..._cookieOptions(),
     maxAge: rollingDays * 24 * 60 * 60 * 1000,
-    path: '/',
   });
 };
 
@@ -221,15 +240,7 @@ const logout = asyncHandler(async (req, res) => {
     }
   }
 
-  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod' || (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
-
-  // Clear the cookie
-  res.clearCookie('refreshToken', {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
-    path: '/',
-  });
+  _clearRefreshCookie(res);
 
   res.status(200).json({
     success: true,
@@ -393,15 +404,7 @@ const updateBio = asyncHandler(async (req, res) => {
 const deleteAccount = asyncHandler(async (req, res) => {
   await userModel.deleteUser(req.user.id);
 
-  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod' || (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
-
-  res.cookie('refreshToken', '', {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
-    expires: new Date(0),
-    path: '/',
-  });
+  _clearRefreshCookie(res);
 
   res.status(200).json({ success: true, data: { message: 'Account deleted successfully' } });
 });

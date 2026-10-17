@@ -392,10 +392,10 @@ const getSeriesEpisodes = async (userId, tmdbId) => {
 };
 
 // --- RATINGS ---
-const getUserRatings = async (userId) => {
+const getUserRatings = async (userId, page = null, limit = 20) => {
   const col = getGamesIdColumn();
-  const result = await pool.query(
-    `SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'movie' as media_type, updated_at as created_at 
+  const baseUnion = `
+     SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'movie' as media_type, updated_at as created_at 
      FROM tracked_movies WHERE user_id = $1 AND rating IS NOT NULL
      UNION ALL
      SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, NULL::integer as season_number, NULL::integer as episode_number, status, rating, review, 'series' as media_type, updated_at as created_at 
@@ -406,10 +406,35 @@ const getUserRatings = async (userId) => {
      UNION ALL
      SELECT id, tmdb_id as media_id, NULL::integer as rawg_id, NULL::integer as igdb_id, season_number, episode_number, status, rating, review, 'episode' as media_type, created_at 
      FROM tracked_episodes WHERE user_id = $1 AND rating IS NOT NULL
-     ORDER BY created_at DESC`,
-    [userId]
-  );
-  return result.rows;
+  `;
+
+  if (!page) {
+    const result = await pool.query(
+      `${baseUnion} ORDER BY created_at DESC`,
+      [userId]
+    );
+    return result.rows;
+  }
+
+  const offset = (page - 1) * limit;
+  const [dataResult, countResult] = await Promise.all([
+    pool.query(
+      `${baseUnion} ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+      [userId, limit, offset]
+    ),
+    pool.query(
+      `SELECT COUNT(*) as count FROM (${baseUnion}) AS all_ratings`,
+      [userId]
+    ),
+  ]);
+
+  const total = parseInt(countResult.rows[0].count, 10);
+  return {
+    items: dataResult.rows,
+    total,
+    page,
+    hasMore: offset + limit < total,
+  };
 };
 
 // --- ALL IDS (lightweight, no pagination) ---

@@ -17,6 +17,18 @@ const buildImageUrl = (path, size = 'w500') => {
   return path ? `${TMDB_IMAGE_BASE_URL}/${size}${path}` : null;
 };
 
+// Basic metadata (title/poster) rarely changes — cache for 24h so library,
+// ratings, reviews and profile pages don't refetch the same items from TMDB.
+const BASIC_TTL = 60 * 60 * 24;
+
+const _cached = async (key, ttl, loader) => {
+  const hit = cache.get(key);
+  if (hit) return hit;
+  const value = await loader();
+  cache.set(key, value, ttl);
+  return value;
+};
+
 // Cleaners
 const cleanMovie = (m) => ({
   id: m.id,
@@ -108,10 +120,11 @@ const getMovieById = async (id) => {
   };
 };
 
-const getMovieBasic = async (id) => {
-  const { data } = await tmdbApi.get(`/movie/${id}`);
-  return cleanMovie(data);
-};
+const getMovieBasic = (id) =>
+  _cached(`tmdb_movie_basic_${id}`, BASIC_TTL, async () => {
+    const { data } = await tmdbApi.get(`/movie/${id}`);
+    return cleanMovie(data);
+  });
 
 // ─── Series ──────────────────────────────────────────────────────────────────
 
@@ -189,29 +202,33 @@ const getSeriesSeason = async (id, seasonNumber) => {
   };
 };
 
-const getEpisodeBasic = async (seriesId, seasonNumber, episodeNumber) => {
-  // First get the series to get the series title and poster fallback
-  const seriesData = await getSeriesBasic(seriesId);
-  const { data } = await tmdbApi.get(`/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`);
-  return {
-    id: data.id,
-    series_title: seriesData.title,
-    title: `${seriesData.title} - S${seasonNumber}E${episodeNumber}: ${data.name}`,
-    poster_url: buildImageUrl(data.still_path) || seriesData.poster_url,
-    backdrop_url: seriesData.backdrop_url,
-    season_number: data.season_number,
-    episode_number: data.episode_number,
-    air_date: data.air_date,
-    vote_average: data.vote_average,
-    overview: data.overview,
-    media_type: 'episode',
-  };
-};
+const getEpisodeBasic = (seriesId, seasonNumber, episodeNumber) =>
+  _cached(`tmdb_episode_basic_${seriesId}_${seasonNumber}_${episodeNumber}`, BASIC_TTL, async () => {
+    // Series (cached) and episode are independent — fetch in parallel
+    const [seriesData, { data }] = await Promise.all([
+      getSeriesBasic(seriesId),
+      tmdbApi.get(`/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`),
+    ]);
+    return {
+      id: data.id,
+      series_title: seriesData.title,
+      title: `${seriesData.title} - S${seasonNumber}E${episodeNumber}: ${data.name}`,
+      poster_url: buildImageUrl(data.still_path) || seriesData.poster_url,
+      backdrop_url: seriesData.backdrop_url,
+      season_number: data.season_number,
+      episode_number: data.episode_number,
+      air_date: data.air_date,
+      vote_average: data.vote_average,
+      overview: data.overview,
+      media_type: 'episode',
+    };
+  });
 
-const getSeriesBasic = async (id) => {
-  const { data } = await tmdbApi.get(`/tv/${id}`);
-  return cleanSeries(data);
-};
+const getSeriesBasic = (id) =>
+  _cached(`tmdb_series_basic_${id}`, BASIC_TTL, async () => {
+    const { data } = await tmdbApi.get(`/tv/${id}`);
+    return cleanSeries(data);
+  });
 
 const getPopularSeries = async (page = 1) => {
   const { data } = await tmdbApi.get('/tv/popular', { params: { page } });

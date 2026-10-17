@@ -203,15 +203,31 @@ const getSeriesEpisodes = asyncHandler(async (req, res) => {
 // --- RATINGS ---
 const getRatings = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const ratings = await libraryModel.getUserRatings(userId);
+  const page = req.query.page ? parseInt(req.query.page, 10) : null;
+  const limit = req.query.limit ? parseInt(req.query.limit, 10) : 20;
+
+  const result = await libraryModel.getUserRatings(userId, page, limit);
+
+  if (!page) {
+    const hydratedRatings = await Promise.all(
+      result.map(item => hydrateItem(item, item.media_type))
+    );
+    return res.status(200).json({
+      success: true,
+      data: hydratedRatings
+    });
+  }
 
   const hydratedRatings = await Promise.all(
-    ratings.map(item => hydrateItem(item, item.media_type))
+    result.items.map(item => hydrateItem(item, item.media_type))
   );
 
   res.status(200).json({
     success: true,
-    data: hydratedRatings
+    data: {
+      ...result,
+      items: hydratedRatings
+    }
   });
 });
 

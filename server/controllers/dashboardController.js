@@ -134,24 +134,53 @@ const getTmdbGenreName = (id) => {
   return map[id] || `Genre ${id}`;
 }
 
-const getInsights = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  
-  const distribution = await dashboardModel.getRatingDistribution(userId);
-  
-  // Format to ensure all ratings from 1 to 10 are present
-  const fullDistribution = Array.from({ length: 10 }, (_, i) => {
-    const ratingStr = (i + 1).toString();
+// Ensure ratings 1..10 are all present (chart expects a full axis)
+const _formatDistribution = (distribution) =>
+  Array.from({ length: 10 }, (_, i) => {
     const found = distribution.find(d => parseFloat(d.rating) === (i + 1));
     return {
-      rating: ratingStr,
+      rating: (i + 1).toString(),
       count: found ? parseInt(found.count) : 0
     };
   });
 
+const getInsights = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  
+  const distribution = await dashboardModel.getRatingDistribution(userId);
+
   res.status(200).json({
     success: true,
-    data: fullDistribution
+    data: _formatDistribution(distribution)
+  });
+});
+
+// Everything the Profile page needs in ONE request. Only the 5 activity items
+// are hydrated from TMDB/IGDB (and those lookups are cached for 24h).
+const getProfileSummary = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  const [counts, distribution, recent] = await Promise.all([
+    dashboardModel.getProfileCounts(userId),
+    dashboardModel.getRatingDistribution(userId),
+    dashboardModel.getRecentRatedOrReviewed(userId, 5),
+  ]);
+
+  const recentActivity = await Promise.all(
+    recent.map(item => hydrateItem(item, item.media_type))
+  );
+
+  const movies = parseInt(counts.movies) || 0;
+  const series = parseInt(counts.series) || 0;
+  const games  = parseInt(counts.games)  || 0;
+
+  res.status(200).json({
+    success: true,
+    data: {
+      counts: { movies, series, games, total: movies + series + games },
+      insights: _formatDistribution(distribution),
+      recentActivity,
+    }
   });
 });
 
@@ -159,5 +188,6 @@ module.exports = {
   getStats,
   getActivity,
   getGenres,
-  getInsights
+  getInsights,
+  getProfileSummary
 };

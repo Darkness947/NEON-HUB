@@ -54,8 +54,7 @@ const Home = () => {
           }
         });
 
-      const randomGamePage = Math.floor(Math.random() * 20) + 1;
-      mediaService.fetchTrendingGames(randomGamePage)
+      mediaService.fetchRandomTrendingGames()
         .then(data => {
           if (!cancelled) {
             setTrendingGames(data);

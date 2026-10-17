@@ -62,8 +62,56 @@ const getRatingDistribution = async (userId) => {
   return result.rows;
 };
 
+// Library counts for the Profile page (matches what the Library tabs show —
+// legacy RAWG-only games are excluded, same as getUserGames).
+const getProfileCounts = async (userId) => {
+  const result = await pool.query(
+    `SELECT
+      (SELECT COUNT(*) FROM tracked_movies WHERE user_id = $1) AS movies,
+      (SELECT COUNT(*) FROM tracked_series WHERE user_id = $1) AS series,
+      (SELECT COUNT(*) FROM tracked_games  WHERE user_id = $1 AND igdb_id IS NOT NULL) AS games`,
+    [userId]
+  );
+  return result.rows[0];
+};
+
+// Most recent items the user rated OR reviewed, newest first. Each tracked row
+// is one media item, so no client-side de-duplication is needed.
+const getRecentRatedOrReviewed = async (userId, limit = 5) => {
+  const result = await pool.query(
+    `SELECT * FROM (
+      SELECT id AS db_id, tmdb_id AS media_id, NULL::integer AS igdb_id, NULL::integer AS rawg_id,
+             NULL::integer AS season_number, NULL::integer AS episode_number,
+             'movie' AS media_type, status, rating, review, updated_at AS created_at
+        FROM tracked_movies
+       WHERE user_id = $1 AND (rating IS NOT NULL OR review IS NOT NULL)
+      UNION ALL
+      SELECT id, tmdb_id, NULL::integer, NULL::integer, NULL::integer, NULL::integer,
+             'series', status, rating, review, updated_at
+        FROM tracked_series
+       WHERE user_id = $1 AND (rating IS NOT NULL OR review IS NOT NULL)
+      UNION ALL
+      SELECT id, igdb_id, igdb_id, rawg_id, NULL::integer, NULL::integer,
+             'game', status, rating, review, updated_at
+        FROM tracked_games
+       WHERE user_id = $1 AND igdb_id IS NOT NULL AND (rating IS NOT NULL OR review IS NOT NULL)
+      UNION ALL
+      SELECT id, tmdb_id, NULL::integer, NULL::integer, season_number, episode_number,
+             'episode', status, rating, review, created_at
+        FROM tracked_episodes
+       WHERE user_id = $1 AND (rating IS NOT NULL OR review IS NOT NULL)
+    ) AS activity
+    ORDER BY created_at DESC
+    LIMIT $2`,
+    [userId, limit]
+  );
+  return result.rows;
+};
+
 module.exports = {
   getStats,
   getRecentTrackedItems,
-  getRatingDistribution
+  getRatingDistribution,
+  getProfileCounts,
+  getRecentRatedOrReviewed,
 };

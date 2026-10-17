@@ -4,7 +4,16 @@ const gamesService = getGamesProvider();
 
 const getTrendingGames = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
-  const games = await gamesService.getTrendingGames(page);
+  const wantsRandom = req.query.random === '1' || req.query.random === 'true';
+
+  let games;
+  if (wantsRandom && typeof gamesService.getRandomTrendingGames === 'function') {
+    games = await gamesService.getRandomTrendingGames(20);
+  } else if (wantsRandom) {
+    games = await gamesService.getTrendingGames(Math.floor(Math.random() * 10) + 1);
+  } else {
+    games = await gamesService.getTrendingGames(page);
+  }
   
   res.status(200).json({
     success: true,

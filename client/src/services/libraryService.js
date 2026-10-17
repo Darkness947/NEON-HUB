@@ -44,8 +44,9 @@ const libraryService = {
   },
 
   // Ratings
-  getRatings: async () => {
-    const { data } = await api.get('/api/library/ratings');
+  getRatings: async (page = null, limit = 20) => {
+    const params = page ? { page, limit } : {};
+    const { data } = await api.get('/api/library/ratings', { params });
     return data.data;
   },
 

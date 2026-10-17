@@ -1,8 +1,10 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const errorHandler = require('./middleware/errorHandler');
 require('./config/db'); // Triggers DB connection test on startup
@@ -10,10 +12,19 @@ require('./config/db'); // Triggers DB connection test on startup
 // Log which provider is active on server startup
 const { getGamesProvider } = require('./services/gamesProviderFactory');
 const gamesProvider = getGamesProvider();
+const { warmPublicCaches } = require('./services/cacheWarmer');
 const app = express();
+
+// ─── Proxy Trust ──────────────────────────────────────────────────────────────────
+// Production path: Browser → Netlify proxy → Render load balancer → Express.
+// Trusting these hops makes req.ip the real client IP (used by rate limiting).
+app.set('trust proxy', parseInt(process.env.TRUST_PROXY_HOPS, 10) || 2);
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
 app.use(helmet());
+
+// ─── Response Compression ──────────────────────────────────────────────────────
+app.use(compression());
 
 // ─── CORS Configuration ───────────────────────────────────────────────────────
 const allowedOrigins = [
@@ -46,6 +57,17 @@ app.use(cookieParser());
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// UptimeRobot target: keeps Render awake AND keeps the Home-page caches hot.
+// Does not query PostgreSQL, so Neon can still scale to zero (free tier).
+app.get('/health/warm', async (req, res) => {
+  const caches = await warmPublicCaches();
+  res.status(200).json({
+    status: 'ok',
+    caches,
     timestamp: new Date().toISOString(),
   });
 });
@@ -98,6 +120,9 @@ app.listen(PORT, () => {
   console.log(neonAscii);
   console.log(`🚀 \x1b[32mNeon Hub server running on port ${PORT}\x1b[0m`);
   console.log(`📍 \x1b[33mEnvironment: ${process.env.NODE_ENV || 'development'}\x1b[0m`);
+
+  // Pre-load Home-page caches so the first visitor after a restart is fast
+  warmPublicCaches().catch(() => {});
 });
 
 module.exports = app;

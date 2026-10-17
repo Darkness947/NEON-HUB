@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// Empty by default → same-origin requests (/api/...). Netlify proxies them to
+// Render in production and Vite proxies them to localhost:5000 in development.
+// Keeping the API same-origin makes the refresh cookie first-party.
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_BASE,
   withCredentials: true,
   timeout: 45000, // 45s — prevents infinite hang during Render cold-starts
 });
@@ -53,7 +58,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/auth/refresh`,
+          `${API_BASE}/api/auth/refresh`,
           {},
           { withCredentials: true }
         );
