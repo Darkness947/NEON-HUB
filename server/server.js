@@ -108,8 +108,9 @@ app.use(errorHandler);
 // ─── Start Server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  const neonAscii = `
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    const neonAscii = `
 \x1b[35m███╗   ██╗\x1b[36m███████╗\x1b[35m ██████╗ \x1b[36m███╗   ██╗\x1b[0m    \x1b[35m██╗  ██╗\x1b[36m██╗   ██╗\x1b[35m██████╗ \x1b[0m
 \x1b[35m████╗  ██║\x1b[36m██╔════╝\x1b[35m██╔═══██╗\x1b[36m████╗  ██║\x1b[0m    \x1b[35m██║  ██║\x1b[36m██║   ██║\x1b[35m██╔══██╗\x1b[0m
 \x1b[35m██╔██╗ ██║\x1b[36m█████╗  \x1b[35m██║   ██║\x1b[36m██╔██╗ ██║\x1b[0m    \x1b[35m███████║\x1b[36m██║   ██║\x1b[35m██████╔╝\x1b[0m
@@ -117,12 +118,13 @@ app.listen(PORT, () => {
 \x1b[35m██║ ╚████║\x1b[36m███████╗\x1b[35m╚██████╔╝\x1b[36m██║ ╚████║\x1b[0m    \x1b[35m██║  ██║\x1b[36m╚██████╔╝\x1b[35m██████╔╝\x1b[0m
 \x1b[35m╚═╝  ╚═══╝\x1b[36m╚══════╝\x1b[35m ╚═════╝ \x1b[36m╚═╝  ╚═══╝\x1b[0m    \x1b[35m╚═╝  ╚═╝\x1b[36m ╚═════╝ \x1b[35m╚═════╝ \x1b[0m
 `;
-  console.log(neonAscii);
-  console.log(`🚀 \x1b[32mNeon Hub server running on port ${PORT}\x1b[0m`);
-  console.log(`📍 \x1b[33mEnvironment: ${process.env.NODE_ENV || 'development'}\x1b[0m`);
+    console.log(neonAscii);
+    console.log(`🚀 \x1b[32mNeon Hub server running on port ${PORT}\x1b[0m`);
+    console.log(`📍 \x1b[33mEnvironment: ${process.env.NODE_ENV || 'development'}\x1b[0m`);
 
-  // Pre-load Home-page caches so the first visitor after a restart is fast
-  warmPublicCaches().catch(() => {});
-});
+    // Pre-load Home-page caches so the first visitor after a restart is fast
+    warmPublicCaches().catch(() => {});
+  });
+}
 
 module.exports = app;

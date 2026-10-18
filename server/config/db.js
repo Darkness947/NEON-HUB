@@ -21,14 +21,16 @@ pool.on('error', (err) => {
   console.error('⚠️  Idle database client error (will reconnect on next query):', err.message);
 });
 
-// Startup connection test — exits if DB is unreachable
-pool.query('SELECT NOW()', (err, result) => {
-  if (err) {
-    console.error('❌ Database connection failed:', err.message);
-    process.exit(1);
-  } else {
-    console.log('✅ Database connected to Neon DB at', result.rows[0].now);
-  }
-});
+// Startup connection test — exits if DB is unreachable (bypassed in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  pool.query('SELECT NOW()', (err, result) => {
+    if (err) {
+      console.error('❌ Database connection failed:', err.message);
+      process.exit(1);
+    } else {
+      console.log('✅ Database connected to Neon DB at', result.rows[0].now);
+    }
+  });
+}
 
 module.exports = pool;

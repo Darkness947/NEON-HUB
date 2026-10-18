@@ -31,8 +31,8 @@ const errorHandler = (err, req, res, next) => {
     code = 'DUPLICATE_ENTRY';
   }
 
-  // Log error in development
-  if (process.env.NODE_ENV !== 'production') {
+  // Log error in development (suppressed in test environment)
+  if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
     console.error('❌ Error:', {
       statusCode,
       code,
