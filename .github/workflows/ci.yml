@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: node24
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # Server Checks: Express.js Backend API
@@ -26,10 +29,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22 (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
 
@@ -59,10 +62,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22 (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: client/package-lock.json
 

@@ -2,8 +2,25 @@ const { Pool } = require('pg');
 
 const rawUrl = (process.env.DATABASE_URL || '').trim().replace(/^['"]|['"]$/g, '');
 
+// Strip `sslmode` query parameter from the connection string to prevent pg-connection-string
+// from emitting the deprecation warning ("SECURITY WARNING: The SSL modes 'prefer', 'require',
+// and 'verify-ca' are treated as aliases for 'verify-full'").
+// SSL is explicitly and securely configured below in the Pool configuration.
+let cleanUrl = rawUrl;
+try {
+  if (rawUrl.includes('?')) {
+    const [base, query] = rawUrl.split('?');
+    const params = new URLSearchParams(query);
+    params.delete('sslmode');
+    const newQuery = params.toString();
+    cleanUrl = newQuery ? `${base}?${newQuery}` : base;
+  }
+} catch {
+  cleanUrl = rawUrl;
+}
+
 const pool = new Pool({
-  connectionString: rawUrl,
+  connectionString: cleanUrl,
   ssl: { rejectUnauthorized: false },
   max: 10,
   // Reuse warm TLS connections across bursts of navigation (each new Neon

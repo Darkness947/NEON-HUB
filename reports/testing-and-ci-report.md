@@ -131,10 +131,33 @@ Configured in [`.github/workflows/ci.yml`](file:///c:/Projects/Neon%20Hub/.githu
 
 ---
 
+## 🛡️ Post-Deployment CI & Render Warning Resolutions
+
+Following the initial CI runs and Render deployments, four warnings were diagnosed and resolved:
+
+### 1. GitHub Actions Node.js 20 Deprecation Warning
+* **Warning:** `Warning: Node.js 20 is deprecated... being forced to run on Node.js 24`.
+* **Fix:** Upgraded application runtime to `node-version: 22` (Active LTS) in `.github/workflows/ci.yml` and set runner environment variable `ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: node24`.
+
+### 2. Client Vitest JSDOM Recreation Warning
+* **Warning:** `Environment jsdom was created 5 times · 5.14s total, 57% of tracked time`.
+* **Fix:** Configured `isolate: false` in `client/vitest.config.js`. JSDOM is instantiated once per worker, cutting test execution time down to **3.54s** with zero warnings.
+
+### 3. Render 12 Dependencies Vulnerabilities
+* **Warning:** `12 vulnerabilities (1 moderate, 10 high, 1 critical)`.
+* **Fix:** Executed `npm audit fix` for transitive dependencies, upgraded `nodemailer` to `^10.1.7`, and upgraded `cloudinary` to `^2.11.0`. Running `npm audit --omit=dev` verifies **0 vulnerabilities** across all production packages.
+
+### 4. PostgreSQL SSL verify-full Security Warning
+* **Warning:** `(node:55) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'`.
+* **Fix:** Sanitized `DATABASE_URL` in `server/config/db.js` by stripping the `sslmode` query parameter. Neon DB TLS remains strictly enforced via the explicit `ssl: { rejectUnauthorized: false }` Pool configuration, eliminating the `pg-connection-string` deprecation notice.
+
+---
+
 ## 🏁 Final Status
 
 * **Total Test Suites:** 10
 * **Total Automated Tests:** 34
 * **Pass Rate:** **100% (34 passed, 0 failed)**
-* **Local Test Speed:** ~5.3s total
-* **CI/CD Status:** ✅ Active via `.github/workflows/ci.yml`
+* **Local Test Speed:** ~5.5s combined (<3.6s client, <2.0s server)
+* **Production Dependencies:** 0 vulnerabilities (`--omit=dev`)
+* **CI/CD Status:** ✅ Active and fully optimized via `.github/workflows/ci.yml`
