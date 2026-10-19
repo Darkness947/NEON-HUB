@@ -151,6 +151,10 @@ Following the initial CI runs and Render deployments, four warnings were diagnos
 * **Warning:** `(node:55) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'`.
 * **Fix:** Sanitized `DATABASE_URL` in `server/config/db.js` by stripping the `sslmode` query parameter. Neon DB TLS remains strictly enforced via the explicit `ssl: { rejectUnauthorized: false }` Pool configuration, eliminating the `pg-connection-string` deprecation notice.
 
+### 5. Server CI Peer Dependency Conflict (`multer-storage-cloudinary` / `cloudinary@2.11.0`)
+* **Error:** `npm error code ERESOLVE` / `peer cloudinary@"^1.21.0" from multer-storage-cloudinary@4.0.0` during `npm ci`.
+* **Fix:** `multer-storage-cloudinary` was a 2020 package that locked `cloudinary` strictly to `1.x`. Rather than pinning an obsolete wrapper or using `--legacy-peer-deps`, we replaced `multer-storage-cloudinary` with a clean, native Multer custom storage engine in `server/middleware/cloudinaryMiddleware.js` using `cloudinary.v2`. Removed `multer-storage-cloudinary` from `server/package.json` and cleanly regenerated `server/package-lock.json`, allowing `npm ci` to succeed deterministically with 0 peer dependency conflicts.
+
 ---
 
 ## 🏁 Final Status
@@ -160,4 +164,4 @@ Following the initial CI runs and Render deployments, four warnings were diagnos
 * **Pass Rate:** **100% (34 passed, 0 failed)**
 * **Local Test Speed:** ~5.5s combined (<3.6s client, <2.0s server)
 * **Production Dependencies:** 0 vulnerabilities (`--omit=dev`)
-* **CI/CD Status:** ✅ Active and fully optimized via `.github/workflows/ci.yml`
+* **CI/CD Status:** ✅ Active and fully optimized via `.github/workflows/ci.yml` (all jobs passing)
